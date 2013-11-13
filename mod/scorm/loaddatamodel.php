@@ -102,7 +102,12 @@ if (scorm_version_check($scorm->version, SCORM_13)) {
 header('Content-Type: text/javascript; charset=UTF-8');
 
 $scorm->version = strtolower(clean_param($scorm->version, PARAM_SAFEDIR));   // Just to be safe.
-if (file_exists($CFG->dirroot.'/mod/scorm/datamodels/'.$scorm->version.'.js.php')) {
+/*
+ * TCAPI - Bypass loading of API since we don't need it when is TCAPI.
+ */
+if (scorm_version_check($scorm->version, SCORM_TCAPI)) {
+	// Do nothing and bypass API loading
+} else if (file_exists($CFG->dirroot.'/mod/scorm/datamodels/'.$scorm->version.'.js.php')) {
     include_once($CFG->dirroot.'/mod/scorm/datamodels/'.$scorm->version.'.js.php');
 } else {
     include_once($CFG->dirroot.'/mod/scorm/datamodels/scorm_12.js.php');

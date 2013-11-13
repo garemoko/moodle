@@ -390,7 +390,8 @@ class mod_scorm_mod_form extends moodleform_mod {
         } else if ($type === SCORM_TYPE_EXTERNAL) {
             $reference = $data['packageurl'];
             // Syntax check.
-            if (!preg_match('/(http:\/\/|https:\/\/|www).*\/imsmanifest.xml$/i', $reference)) {
+            if (!preg_match('/(http:\/\/|https:\/\/|www).*\/imsmanifest.xml$/i', $reference)
+                && !preg_match('/(http:\/\/|https:\/\/|www).*\/tincan.xml$/i', $reference)) {
                 $errors['packageurl'] = get_string('invalidurl', 'scorm');
             } else {
                 // Availability check.
@@ -399,7 +400,6 @@ class mod_scorm_mod_form extends moodleform_mod {
                     $errors['packageurl'] = $result;
                 }
             }
-
         } else if ($type === 'packageurl') {
             $reference = $data['reference'];
             // Syntax check.

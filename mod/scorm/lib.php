@@ -43,6 +43,7 @@ define('SCORM_NAV_FLOATING', 2);
 define('SCORM_12', 1);
 define('SCORM_13', 2);
 define('SCORM_AICC', 3);
+define('SCORM_TCAPI', 4);
 
 // List of possible attemptstatusdisplay options.
 define('SCORM_DISPLAY_ATTEMPTSTATUS_NO', 0);
@@ -1171,6 +1172,14 @@ function scorm_version_check($scormversion, $version='') {
             return false;
         }
     }
+    if (empty($version) || $version == SCORM_TCAPI) {
+        if ($scormversion == 'tcapi') {
+            return SCORM_TCAPI;
+        }
+        if (!empty($version)) {
+            return false;
+        }
+    }
     return false;
 }
 
@@ -1378,6 +1387,9 @@ function scorm_validate_package($file) {
                 $badmanifestpresent = true;
             }
             if (preg_match('/\.cst$/', $info->pathname)) {
+                return array();
+            }
+            if ($info->pathname == 'tincan.xml') {
                 return array();
             }
         }
