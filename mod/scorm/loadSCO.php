@@ -114,49 +114,42 @@ if ($sco->scormtype == 'asset') {
 //
 $connector = '';
 if (scorm_version_check($scorm->version, SCORM_TCAPI)) {
-	/*
-	 * Exclusive to TCAPI version
-	 */
-	require_once("$CFG->dirroot/mod/scorm/datamodels/tincanlib.php");
-	$launcher = $sco->launch;
+    require_once("$CFG->dirroot/mod/scorm/datamodels/tincanlib.php");
+    $launcher = $sco->launch;
 } else {
-	/*
-	 * Start of standard SCORM code.
-	 */
-	$version = substr($scorm->version, 0, 4);
-	if ((isset($sco->parameters) && (!empty($sco->parameters))) || ($version == 'AICC')) {
-	    if (stripos($sco->launch, '?') !== false) {
-	        $connector = '&';
-	    } else {
-	        $connector = '?';
-	    }
-	    if ((isset($sco->parameters) && (!empty($sco->parameters))) && ($sco->parameters[0] == '?')) {
-	        $sco->parameters = substr($sco->parameters, 1);
-	    }
-	}
-	
-	if ($version == 'AICC') {
-	    require_once("$CFG->dirroot/mod/scorm/datamodels/aicclib.php");
-	    $aicc_sid = scorm_aicc_get_hacp_session($scorm->id);
-	    if (empty($aicc_sid)) {
-	        $aicc_sid = sesskey();
-	    }
-	    $sco_params = '';
-	    if (isset($sco->parameters) && (!empty($sco->parameters))) {
-	        $sco_params = '&'. $sco->parameters;
-	    }
-	    $launcher = $sco->launch.$connector.'aicc_sid='.$aicc_sid.'&aicc_url='.$CFG->wwwroot.'/mod/scorm/aicc.php'.$sco_params;
-	} else {
-	    if (isset($sco->parameters) && (!empty($sco->parameters))) {
-	        $launcher = $sco->launch.$connector.$sco->parameters;
-	    } else {
-	        $launcher = $sco->launch;
-	    }
-	}
+    $version = substr($scorm->version, 0, 4);
+    if ((isset($sco->parameters) && (!empty($sco->parameters))) || ($version == 'AICC')) {
+        if (stripos($sco->launch, '?') !== false) {
+            $connector = '&';
+        } else {
+            $connector = '?';
+        }
+        if ((isset($sco->parameters) && (!empty($sco->parameters))) && ($sco->parameters[0] == '?')) {
+            $sco->parameters = substr($sco->parameters, 1);
+        }
+    }
+
+    if ($version == 'AICC') {
+        require_once("$CFG->dirroot/mod/scorm/datamodels/aicclib.php");
+        $aiccsid = scorm_aicc_get_hacp_session($scorm->id);
+        if (empty($aiccsid)) {
+            $aiccsid = sesskey();
+        }
+        $scoparams = '';
+        if (isset($sco->parameters) && (!empty($sco->parameters))) {
+            $scoparams = '&'. $sco->parameters;
+        }
+        $launcher = $sco->launch.$connector.'aicc_sid='.$aiccsid.'&aicc_url='.$CFG->wwwroot.'/mod/scorm/aicc.php'.$scoparams;
+    } else {
+        if (isset($sco->parameters) && (!empty($sco->parameters))) {
+            $launcher = $sco->launch.$connector.$sco->parameters;
+        } else {
+            $launcher = $sco->launch;
+        }
+    }
 }
 
 if (scorm_external_link($sco->launch)) {
-    //TODO: does this happen?
     $result = $launcher;
 } else if ($scorm->scormtype === SCORM_TYPE_EXTERNAL) {
     // Remote learning activity.
@@ -176,12 +169,11 @@ add_to_log($course->id, 'scorm', 'launch', 'view.php?id='.$cm->id, $result, $cm-
  * TCAPI - Bypass API requirements and immediatly redirect to $result.
  * See below JS logic.
  */
-$noAPI = '0';
+$tcapi = '0';
 if (scorm_version_check($scorm->version, SCORM_TCAPI)) {
-	$noAPI = '1';
-	// Add tcapi_params after logging $result to prevent throwing a log length warning.
-	$tcapi_params = scorm_get_tincan_launch_params($scorm,$sco,$result);
-	$result .= $tcapi_params;
+    $tcapi = '1';
+    // Add tcapi_params after logging $result to prevent throwing a log length warning.
+    $result .= scorm_get_tincan_launch_params($scorm, $sco, $result);
 }
 
 header('Content-Type: text/html; charset=UTF-8');
@@ -203,9 +195,7 @@ $LMS_api = (scorm_version_check($scorm->version, SCORM_12) || empty($scorm->vers
         <title>LoadSCO</title>
         <script type="text/javascript">
         //<![CDATA[
-
-        var noAPI = <?php echo $noAPI; // TCAPI added this line for redirect logic. ?>;
-        
+        var tcapi = <?php echo $tcapi; ?>;
         var myApiHandle = null;
         var myFindAPITries = 0;
 
@@ -242,7 +232,7 @@ $LMS_api = (scorm_version_check($scorm->version, SCORM_12) || empty($scorm->vers
         }
 
        function doredirect() {
-            if (noAPI === 1 || myGetAPIHandle() != null) { <?php // TCAPI added 'noAPI === 1 || ' for redirect logic. ?>
+            if (tcapi === 1 || myGetAPIHandle() != null) {
                     location = "<?php echo $result ?>";
             }
             else {
