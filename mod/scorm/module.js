@@ -29,7 +29,7 @@ scorm_layout_widget = null;
 
 M.mod_scorm = {};
 
-M.mod_scorm.init = function(Y, nav_display, navposition_left, navposition_top, hide_toc, collapsetocwinsize, toc_title, window_name, launch_sco, scoes_nav) {
+M.mod_scorm.init = function(Y, nav_display, navposition_left, navposition_top, hide_toc, collapsetocwinsize, toc_title, window_name, launch_sco, scoes_nav, scormversion) {
     var scorm_disable_toc = false;
     var scorm_hide_nav = true;
     var scorm_hide_toc = true;
@@ -154,7 +154,7 @@ M.mod_scorm.init = function(Y, nav_display, navposition_left, navposition_top, h
                 el_old_api.parentNode.removeChild(el_old_api);
             }
 
-            if (node.title) {
+            if (node.title && scormversion !== 'tcapi') {
                 var el_scorm_api = document.getElementById("external-scormapi");
                 el_scorm_api.parentNode.removeChild(el_scorm_api);
                 el_scorm_api = document.createElement('script');

@@ -266,8 +266,10 @@ if (empty($scorm->popup) || $displaymode == 'popup') {
         'requires' => array('json'),
     );
     $scorm->nav = intval($scorm->nav);
-    $PAGE->requires->js_init_call('M.mod_scorm.init', array($scorm->nav, $scorm->navpositionleft, $scorm->navpositiontop, $scorm->hidetoc,
-                                                            $collapsetocwinsize, $result->toctitle, $name, $sco->id, $adlnav), false, $jsmodule);
+    $PAGE->requires->js_init_call('M.mod_scorm.init', array($scorm->nav, $scorm->navpositionleft, $scorm->navpositiontop,
+                                                            $scorm->hidetoc, $collapsetocwinsize, $result->toctitle,
+                                                            $name, $sco->id, $adlnav, $scorm->version),
+                                  false, $jsmodule);
 }
 if (!empty($forcejs)) {
     echo $OUTPUT->box(get_string("forcejavascriptmessage", "scorm"), "generalbox boxaligncenter forcejavascriptmessage");
