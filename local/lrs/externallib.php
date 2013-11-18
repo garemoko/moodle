@@ -26,28 +26,28 @@ class local_lrs_external extends external_api {
 
     public static function fetch_statement_parameters () {
         return new external_function_parameters(
-                array('moodle_mod' => new external_value(PARAM_TEXT, 'Moodle module name, if any', VALUE_DEFAULT, NULL), 
-                	'moodle_mod_id' => new external_value(PARAM_TEXT, 'Moodle module id, if any', VALUE_DEFAULT, NULL),
-                	'registration' => new external_value(PARAM_TEXT, 'Registration ID associated with this state', VALUE_DEFAULT, NULL),
-                	'statementId' => new external_value(PARAM_TEXT, 'Statement ID associated with this state', VALUE_DEFAULT, NULL),
+                array('moodle_mod' => new external_value(PARAM_TEXT, 'Moodle module name, if any', VALUE_DEFAULT, null),
+                    'moodle_mod_id' => new external_value(PARAM_TEXT, 'Moodle module id, if any', VALUE_DEFAULT, null),
+                    'registration' => new external_value(PARAM_TEXT, 'Registration ID associated with this state', VALUE_DEFAULT, null),
+                    'statementId' => new external_value(PARAM_TEXT, 'Statement ID associated with this state', VALUE_DEFAULT, null),
                 )
         );
     }
 
-    public static function fetch_statement ($moodle_mod,$moodle_mod_id,$registration,$statementId) {
+    public static function fetch_statement ($moodle_mod, $moodle_mod_id, $registration, $statementId) {
         global $CFG;
-        
-        $params = array('registration'=>$registration,'statementId'=>$statementId);
-                
+
+        $params = array('registration' => $registration, 'statementId' => $statementId);
+
         $statementObject = local_lrs_fetch_statement($params);
         if (!is_null($moodle_mod) && file_exists($CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php')) {
-        	include_once $CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php';
-        	$mod_function = $moodle_mod.'_tcapi_fetch_statement';
-        	$params['moodle_mod_id'] = $moodle_mod_id;
-        	if (function_exists($mod_function))
-        		return call_user_func($mod_function, $params, $statementObject);
-        }	
-        	        
+            include_once $CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php';
+            $mod_function = $moodle_mod.'_tcapi_fetch_statement';
+            $params['moodle_mod_id'] = $moodle_mod_id;
+            if (function_exists($mod_function))
+                return call_user_func($mod_function, $params, $statementObject);
+
+
         return $statementObject->statement;
     }
 
@@ -55,31 +55,31 @@ class local_lrs_external extends external_api {
         return new external_value(PARAM_TEXT, 'Statement requested if exists');
     }
 
-	public static function store_statement_parameters () {
+    public static function store_statement_parameters () {
         return new external_function_parameters(
                 array('moodle_mod' => new external_value(PARAM_TEXT, 'Moodle module name, if any', VALUE_DEFAULT, NULL), 
-                	'moodle_mod_id' => new external_value(PARAM_TEXT, 'Moodle module id, if any', VALUE_DEFAULT, NULL),
-                	'registration' => new external_value(PARAM_TEXT, 'Registration ID associated with this state', VALUE_DEFAULT, NULL),
-                	'statementId' => new external_value(PARAM_TEXT, 'Statement ID associated with this state', VALUE_DEFAULT, NULL),
-                	'content' => new external_value(PARAM_TEXT, 'Statement to store', VALUE_DEFAULT, ''),
+                    'moodle_mod_id' => new external_value(PARAM_TEXT, 'Moodle module id, if any', VALUE_DEFAULT, NULL),
+                    'registration' => new external_value(PARAM_TEXT, 'Registration ID associated with this state', VALUE_DEFAULT, NULL),
+                    'statementId' => new external_value(PARAM_TEXT, 'Statement ID associated with this state', VALUE_DEFAULT, NULL),
+                    'content' => new external_value(PARAM_TEXT, 'Statement to store', VALUE_DEFAULT, ''),
                 )
         );
     }
 
-    public static function store_statement ($moodle_mod,$moodle_mod_id,$registration,$statementId,$content) {
+    public static function store_statement ($moodle_mod, $moodle_mod_id, $registration, $statementId, $content) {
         global $CFG;
-        
+
         $params = array('registration'=>$registration,'statementId'=>$statementId,'content' => $content);
-                
+
         $statementObject = local_lrs_store_statement($params);
         if (!is_null($moodle_mod) && file_exists($CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php')) {
-        	include_once $CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php';
-        	$mod_function = $moodle_mod.'_tcapi_store_statement';
-        	$params['moodle_mod_id'] = $moodle_mod_id;
-        	if (function_exists($mod_function))
-        		return call_user_func($mod_function, $params, $statementObject);
+            include_once $CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php';
+            $mod_function = $moodle_mod.'_tcapi_store_statement';
+            $params['moodle_mod_id'] = $moodle_mod_id;
+            if (function_exists($mod_function))
+                return call_user_func($mod_function, $params, $statementObject);
         }	
-        	        
+
         return $statementObject->statementId;
     }
 
@@ -87,35 +87,35 @@ class local_lrs_external extends external_api {
         return new external_value(PARAM_TEXT, 'Statement ID of stored statement');
     }
 
-	public static function store_activity_state_parameters () {
+    public static function store_activity_state_parameters () {
         return new external_function_parameters(
                 array('moodle_mod' => new external_value(PARAM_TEXT, 'Moodle module name, if any', VALUE_DEFAULT, NULL), 
-                	'moodle_mod_id' => new external_value(PARAM_TEXT, 'Moodle module id, if any', VALUE_DEFAULT, NULL),
-                	'content' => new external_value(PARAM_TEXT, 'State document to store', VALUE_DEFAULT, ''),
-                	'activityId' => new external_value(PARAM_TEXT, 'Activity ID associated with this state'),
-                	'actor' => new external_value(PARAM_RAW, 'Actor associated with this state'),
-                	'registration' => new external_value(PARAM_TEXT, 'Registration ID associated with this state', VALUE_DEFAULT, NULL),
-                	'stateId' => new external_value(PARAM_TEXT, 'id for the state, within the given context'),
+                    'moodle_mod_id' => new external_value(PARAM_TEXT, 'Moodle module id, if any', VALUE_DEFAULT, NULL),
+                    'content' => new external_value(PARAM_TEXT, 'State document to store', VALUE_DEFAULT, ''),
+                    'activityId' => new external_value(PARAM_TEXT, 'Activity ID associated with this state'),
+                    'actor' => new external_value(PARAM_RAW, 'Actor associated with this state'),
+                    'registration' => new external_value(PARAM_TEXT, 'Registration ID associated with this state', VALUE_DEFAULT, NULL),
+                    'stateId' => new external_value(PARAM_TEXT, 'id for the state, within the given context'),
                 )
         );
     }
 
     public static function store_activity_state($moodle_mod,$moodle_mod_id,$content,$activityId,$actor,$registration,$stateId) {
         global $CFG;
-        
+
         $params = array('content' => $content,'activityId'=>$activityId,'actor'=>$actor,'registration'=>$registration,'stateId'=>$stateId);
         $params['actor'] = json_decode($actor);
-                
+
         $response = local_lrs_store_activity_state($params);
-        
+
         if (!is_null($moodle_mod) && file_exists($CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php')) {
-        	include_once $CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php';
-        	$mod_function = $moodle_mod.'_tcapi_store_activity_state';
-        	$params['moodle_mod_id'] = $moodle_mod_id;
-        	if (function_exists($mod_function))
-        		return call_user_func($mod_function, $params, $response);
+            include_once $CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php';
+            $mod_function = $moodle_mod.'_tcapi_store_activity_state';
+            $params['moodle_mod_id'] = $moodle_mod_id;
+            if (function_exists($mod_function))
+                return call_user_func($mod_function, $params, $response);
         }	
-        
+
         return $response;
     }
 
@@ -126,32 +126,32 @@ class local_lrs_external extends external_api {
     public static function fetch_activity_state_parameters() {
         return new external_function_parameters(
                 array('moodle_mod' => new external_value(PARAM_TEXT, 'Moodle module name, if any', VALUE_DEFAULT, NULL), 
-                	'moodle_mod_id' => new external_value(PARAM_TEXT, 'Moodle module id, if any', VALUE_DEFAULT, NULL),
-                	'activityId' => new external_value(PARAM_TEXT, 'Activity ID associated with state(s)'),
-                	'actor' => new external_value(PARAM_RAW, 'Actor associated with state(s)'),
-                	'registration' => new external_value(PARAM_TEXT, 'Registration ID associated with state(s)', VALUE_DEFAULT, NULL),
-                	'stateId' => new external_value(PARAM_TEXT, 'id for the state, within the given context', VALUE_DEFAULT, NULL),
-                	'since' => new external_value(PARAM_TEXT, 'time benchmark, if any', VALUE_DEFAULT, NULL),
+                    'moodle_mod_id' => new external_value(PARAM_TEXT, 'Moodle module id, if any', VALUE_DEFAULT, NULL),
+                    'activityId' => new external_value(PARAM_TEXT, 'Activity ID associated with state(s)'),
+                    'actor' => new external_value(PARAM_RAW, 'Actor associated with state(s)'),
+                    'registration' => new external_value(PARAM_TEXT, 'Registration ID associated with state(s)', VALUE_DEFAULT, NULL),
+                    'stateId' => new external_value(PARAM_TEXT, 'id for the state, within the given context', VALUE_DEFAULT, NULL),
+                    'since' => new external_value(PARAM_TEXT, 'time benchmark, if any', VALUE_DEFAULT, NULL),
                 )
         );
     }
 
     public static function fetch_activity_state($moodle_mod,$moodle_mod_id,$activityId,$actor,$registration,$stateId,$since) {
         global $CFG;
-        
+
         $params = array('activityId'=>$activityId,'actor'=>$actor,'registration'=>$registration,'stateId'=>$stateId,'since'=>$since);
         $params['actor'] = json_decode($actor);
-                
+
         $response = local_lrs_fetch_activity_state($params);
-        
+
         if (!is_null($moodle_mod) && file_exists($CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php')) {
-        	include_once $CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php';
-        	$mod_function = $moodle_mod.'_tcapi_fetch_activity_state';
-        		$params['moodle_mod_id'] = $moodle_mod_id;
-        	if (function_exists($mod_function))
-        		return call_user_func($mod_function, $params, $response);
+            include_once $CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php';
+            $mod_function = $moodle_mod.'_tcapi_fetch_activity_state';
+                $params['moodle_mod_id'] = $moodle_mod_id;
+            if (function_exists($mod_function))
+                return call_user_func($mod_function, $params, $response);
         }		
-        
+
         return $response;
     }
 
@@ -162,33 +162,33 @@ class local_lrs_external extends external_api {
     public static function delete_activity_state_parameters() {
         return new external_function_parameters(
                 array('moodle_mod' => new external_value(PARAM_TEXT, 'Moodle module name, if any', VALUE_DEFAULT, NULL), 
-                	'moodle_mod_id' => new external_value(PARAM_TEXT, 'Moodle module id, if any', VALUE_DEFAULT, NULL),
-                	'activityId' => new external_value(PARAM_TEXT, 'Activity ID associated with state(s)'),
-                	'actor' => new external_value(PARAM_RAW, 'Actor associated with state(s)'),
-                	'registration' => new external_value(PARAM_TEXT, 'Registration ID associated with state(s)', VALUE_DEFAULT, NULL),
+                    'moodle_mod_id' => new external_value(PARAM_TEXT, 'Moodle module id, if any', VALUE_DEFAULT, NULL),
+                    'activityId' => new external_value(PARAM_TEXT, 'Activity ID associated with state(s)'),
+                    'actor' => new external_value(PARAM_RAW, 'Actor associated with state(s)'),
+                    'registration' => new external_value(PARAM_TEXT, 'Registration ID associated with state(s)', VALUE_DEFAULT, NULL),
                 )
         );
     }
 
     public static function delete_activity_state($moodle_mod,$moodle_mod_id,$activityId,$actor,$registration) {
         global $CFG;
-        
+
         $params = array('activityId'=>$activityId,'actor'=>$actor,'registration'=>$registration);
         $params['actor'] = json_decode($actor);
-                
+
         if (!is_null($moodle_mod) && file_exists($CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php')) {
-        	include_once $CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php';
-        	$mod_function = $moodle_mod.'_tcapi_fetch_activity_state';
-        	if (function_exists($mod_function)) {
-        		$params['moodle_mod_id'] = $moodle_mod_id;
-        		$params = $mod_function($params);
-        	}
+            include_once $CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php';
+            $mod_function = $moodle_mod.'_tcapi_fetch_activity_state';
+            if (function_exists($mod_function)) {
+                $params['moodle_mod_id'] = $moodle_mod_id;
+                $params = $mod_function($params);
+            }
         }		
         unset($params['moodle_mod_id']);
         if (isset($params['response']))
-        	return $params['response'];
+            return $params['response'];
         else
-    		return local_lrs_delete_activity_state($params);
+            return local_lrs_delete_activity_state($params);
     }
 
     public static function delete_activity_state_returns() {

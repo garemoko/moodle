@@ -188,7 +188,7 @@ class webservice_lrs_server extends webservice_base_server {
         }
         //echo $body;
         if (!isset($methodvariables['content']))
-        	$methodvariables['content'] = $body;      
+        	$methodvariables['content'] = $body;
         if ($body_params = json_decode($body)) {
             foreach($body_params as $param_name => $param_value) {
                 $methodvariables[$param_name] = stripslashes($param_value);
