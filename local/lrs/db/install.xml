@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/tcapi/db" VERSION="20130205" COMMENT="XMLDB file for Moodle local/tcapi"
+<XMLDB PATH="local/lrs/db" VERSION="20130205" COMMENT="XMLDB file for Moodle local/lrs"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="tcapi_activity" COMMENT="tcapi_activity table retrofitted from MySQL" NEXT="tcapi_agent">
+    <TABLE NAME="lrs_activity" COMMENT="lrs_activity table retrofitted from MySQL" NEXT="lrs_agent">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="true" NEXT="activity_id"/>
         <FIELD NAME="activity_id" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" PREVIOUS="id" NEXT="metaurl"/>
@@ -24,7 +24,7 @@
         <INDEX NAME="activityid" UNIQUE="false" FIELDS="activity_id"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="tcapi_agent" COMMENT="tcapi_agent table retrofitted from MySQL" PREVIOUS="tcapi_activity" NEXT="tcapi_result">
+    <TABLE NAME="lrs_agent" COMMENT="lrs_agent table retrofitted from MySQL" PREVIOUS="lrs_activity" NEXT="lrs_result">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="true" NEXT="object_type"/>
         <FIELD NAME="object_type" TYPE="char" LENGTH="25" NOTNULL="true" SEQUENCE="false" PREVIOUS="id" NEXT="name"/>
@@ -44,7 +44,7 @@
         <KEY NAME="id" TYPE="primary" FIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="tcapi_result" COMMENT="tcapi_result table retrofitted from MySQL" PREVIOUS="tcapi_agent" NEXT="tcapi_state">
+    <TABLE NAME="lrs_result" COMMENT="lrs_result table retrofitted from MySQL" PREVIOUS="lrs_agent" NEXT="lrs_state">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="true" NEXT="score"/>
         <FIELD NAME="score" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="id" NEXT="success"/>
@@ -58,7 +58,7 @@
         <KEY NAME="id" TYPE="primary" FIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="tcapi_state" COMMENT="tcapi_state table retrofitted from MySQL" PREVIOUS="tcapi_result" NEXT="tcapi_statement">
+    <TABLE NAME="lrs_state" COMMENT="lrs_state table retrofitted from MySQL" PREVIOUS="lrs_result" NEXT="lrs_statement">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="true" NEXT="activityid"/>
         <FIELD NAME="activityid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="id" NEXT="actorid"/>
@@ -76,7 +76,7 @@
         <INDEX NAME="activityid" UNIQUE="false" FIELDS="activityid, actorid"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="tcapi_statement" COMMENT="tcapi_statement table retrofitted from MySQL" PREVIOUS="tcapi_state">
+    <TABLE NAME="lrs_statement" COMMENT="lrs_statement table retrofitted from MySQL" PREVIOUS="lrs_state">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="true" NEXT="statement_id"/>
         <FIELD NAME="statement_id" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" PREVIOUS="id" NEXT="statement"/>

@@ -25,12 +25,12 @@
 function scorm_get_tincan_launch_params($scorm, $sco, $launchurl) {
     global $CFG, $USER;
     // verify tcapi plugin exists, if not, return nothing.
-    if (!file_exists($CFG->dirroot.'/local/tcapi/locallib.php')) {
+    if (!file_exists($CFG->dirroot.'/local/lrs/locallib.php')) {
         return '';
     }
-    require_once($CFG->dirroot.'/local/tcapi/locallib.php');
-    // Call the TCAPI local webservice locallib for token and endpoint.
-    $token = local_tcapi_get_user_token();
+    require_once($CFG->dirroot.'/local/lrs/locallib.php');
+    // Call the LRS local webservice locallib for token and endpoint.
+    $token = local_lrs_get_user_token();
     // Generate activity_id as unique using URI method (also provides LRS with metadata path).
     $activityid = str_ireplace($sco->launch, 'tincan.xml', $launchurl);
     // Determine connector for launch params.
@@ -41,7 +41,7 @@ function scorm_get_tincan_launch_params($scorm, $sco, $launchurl) {
     $revision = $scorm->revision;
     // gather all the launch params.
     $launchparams = array(
-    'endpoint' => TCAPI_ENDPOINT,
+    'endpoint' => LRS_ENDPOINT,
     'auth' => $token->token,
     'moodle_mod' => 'scorm',
     'moodle_mod_id' => $sco->id,
@@ -53,7 +53,7 @@ function scorm_get_tincan_launch_params($scorm, $sco, $launchurl) {
     if ($pos = strpos($launchurl, '/pluginfile.php')) {
         $wscontenturl = substr($launchurl, $pos, strlen($sco->launch) * -1);
         $wscontenturl = str_ireplace('/pluginfile.php', '/', $wscontenturl);
-        $launchparams['content_endpoint'] = TCAPI_CONTENT_ENDPOINT.$wscontenturl;
+        $launchparams['content_endpoint'] = LRS_CONTENT_ENDPOINT.$wscontenturl;
         $launchparams['content_token'] = $token->token;
     }
     $paramsencoded = array();

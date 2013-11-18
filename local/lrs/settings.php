@@ -1,10 +1,4 @@
 <?php
-/*
- * Created for addition of TCAPI support.
- * Jamie Smith - jamie.g.smith@gmail.com
- * Search for TCAPI for modification lines and documentation.
- */
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -21,16 +15,19 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'webservice_tcapi', language 'en'
+ * Web service local plugin tcapi settings code.
  *
- * @package    webservice_tcapi
- * @category   string
+ * @package    local_lrs
  * @copyright  2012 Jamie Smith
  */
 
-$string['pluginname'] = 'Tin Can API protocol';
-$string['tcapi:settings'] = 'Tin Can API Settings';
-$string['tcapi:onoffoption'] = 'On/Off Option';
-$string['tcapi:onoffoptiondescr'] = 'This is a description of the On/Off option.';
-$string['tcapi:use'] = 'Use Tin Can API protocol';
-$string['tcapi:fetchstatement'] = 'Fetch Statements using Tin Can API protocol';
+defined('MOODLE_INTERNAL') || die;
+
+/*
+ * For future use.
+if ($hassiteconfig) {
+	$settings = new admin_settingpage('local_tcapi', get_string('tcapi:settings','local_tcapi'));
+	$ADMIN->add('localplugins', $settings);
+	$settings->add(new admin_setting_configcheckbox('local_lrs/onoff', get_string('lrs:onoffoption','local_lrs'), get_string('lrs:onoffoptiondescr','local_lrs'), '0'));
+}
+*/

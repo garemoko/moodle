@@ -22,6 +22,21 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+
+// Verify this site is configured to allow Tin can
+function scorm_tincan_enabled($cmid = '') {
+    // First check web services are enabled.
+    if (empty($CFG->enablewebservices)) {
+        return false;
+    }
+    // Check REST protocol enabled.
+    if (!webservice_protocol_is_enabled('rest')) {
+        return false;
+    }
+
+    // TODO: check permissions of users in this
+}
+
 /*
  * Objectives of this library is to provide functions that handle incoming
  * TCAPI requests from the local/tcapi webservice.

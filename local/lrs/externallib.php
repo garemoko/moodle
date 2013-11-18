@@ -1,10 +1,6 @@
 <?php
-/*
- * Created for addition of TCAPI support.
- * Jamie Smith - jamie.g.smith@gmail.com
- * Copied from common access.php as in other plugins.
- */
-
+// This file is part of Moodle - http://moodle.org/
+//
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -21,12 +17,12 @@
 /**
  * Tin Can API protocal as Local Plugin
  *
- * @package    local_tcapi
+ * @package    local_lrs
  * @copyright  2012 Jamie Smith
  */
 require_once($CFG->libdir . "/externallib.php");
 
-class local_tcapi_external extends external_api {
+class local_lrs_external extends external_api {
 
     public static function fetch_statement_parameters () {
         return new external_function_parameters(
@@ -43,7 +39,7 @@ class local_tcapi_external extends external_api {
         
         $params = array('registration'=>$registration,'statementId'=>$statementId);
                 
-        $statementObject = local_tcapi_fetch_statement($params);
+        $statementObject = local_lrs_fetch_statement($params);
         if (!is_null($moodle_mod) && file_exists($CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php')) {
         	include_once $CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php';
         	$mod_function = $moodle_mod.'_tcapi_fetch_statement';
@@ -75,7 +71,7 @@ class local_tcapi_external extends external_api {
         
         $params = array('registration'=>$registration,'statementId'=>$statementId,'content' => $content);
                 
-        $statementObject = local_tcapi_store_statement($params);
+        $statementObject = local_lrs_store_statement($params);
         if (!is_null($moodle_mod) && file_exists($CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php')) {
         	include_once $CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php';
         	$mod_function = $moodle_mod.'_tcapi_store_statement';
@@ -110,7 +106,7 @@ class local_tcapi_external extends external_api {
         $params = array('content' => $content,'activityId'=>$activityId,'actor'=>$actor,'registration'=>$registration,'stateId'=>$stateId);
         $params['actor'] = json_decode($actor);
                 
-        $response = local_tcapi_store_activity_state($params);
+        $response = local_lrs_store_activity_state($params);
         
         if (!is_null($moodle_mod) && file_exists($CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php')) {
         	include_once $CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php';
@@ -146,7 +142,7 @@ class local_tcapi_external extends external_api {
         $params = array('activityId'=>$activityId,'actor'=>$actor,'registration'=>$registration,'stateId'=>$stateId,'since'=>$since);
         $params['actor'] = json_decode($actor);
                 
-        $response = local_tcapi_fetch_activity_state($params);
+        $response = local_lrs_fetch_activity_state($params);
         
         if (!is_null($moodle_mod) && file_exists($CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php')) {
         	include_once $CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php';
@@ -192,7 +188,7 @@ class local_tcapi_external extends external_api {
         if (isset($params['response']))
         	return $params['response'];
         else
-    		return local_tcapi_delete_activity_state($params);
+    		return local_lrs_delete_activity_state($params);
     }
 
     public static function delete_activity_state_returns() {

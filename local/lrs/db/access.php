@@ -1,9 +1,6 @@
 <?php
-/*
- * Created for addition of TCAPI support.
- * Jamie Smith - jamie.g.smith@gmail.com
- */
-
+// This file is part of Moodle - http://moodle.org/
+//
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -18,21 +15,21 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Web service local plugin tcapi settings code.
+ * LRS server related capabilities
  *
- * @package    local_tcapi
- * @copyright  2012 Jamie Smith
+ * @package    local_lrs
+ * @category   access
  */
 
-defined('MOODLE_INTERNAL') || die;
+$capabilities = array(
 
-/*
- * For future use.
-if ($hassiteconfig) {
-	$settings = new admin_settingpage('local_tcapi', get_string('tcapi:settings','local_tcapi'));
-	$ADMIN->add('localplugins', $settings);
-	$settings->add(new admin_setting_configcheckbox('local_tcapi/onoff', get_string('tcapi:onoffoption','local_tcapi'), get_string('tcapi:onoffoptiondescr','local_tcapi'), '0'));
-}
-*/
+    'local/lrs:use' => array(
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_SYSTEM,
+    ),
+    'local/lrs:fetchstatement' => array(
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_SYSTEM,
+    ),
 
-?>
+);

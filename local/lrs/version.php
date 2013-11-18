@@ -1,10 +1,6 @@
 <?php
-/*
- * Created for addition of TCAPI support.
- * Jamie Smith - jamie.g.smith@gmail.com
- * Copied from common access.php as in other plugins.
- */
-
+// This file is part of Moodle - http://moodle.org/
+//
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -18,22 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * TCAPI/LRS server related capabilities
- *
- * @package    local_tcapi
- * @category   access
- */
-
-$capabilities = array(
-
-    'local/tcapi:use' => array(
-        'captype' => 'read',
-        'contextlevel' => CONTEXT_SYSTEM,
-    ),
-    'local/tcapi:fetchstatement' => array(
-    	'captype' => 'read',
-    	'contextlevel' => CONTEXT_SYSTEM,
-    ),
-
-);
+$plugin->version  = 2013020503;
+$plugin->requires = 2010112400;  // Requires this Moodle version - at least 2.0
+$plugin->cron     = 0;
+$plugin->release = '1.0 (Build: 2012111500)';
+$plugin->maturity = MATURITY_STABLE;
+$plugin->component = 'local_lrs';

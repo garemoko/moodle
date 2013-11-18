@@ -1,4 +1,19 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /*
  * The content end point expects a relative file path to be passed just as Moodle's file.php.
  * The purpose in using this method vs. a redirect is to eliminate a round-trip request.
@@ -64,20 +79,20 @@ if ($action == 'return_file') {
 	//finally we can serve the file :)
 	$relativepath = get_file_argument();
 	echo 'Relative path = '.$relativepath."\n";
-	tcapi_create_content_log();
+	lrs_create_content_log();
 	
 	file_pluginfile($relativepath, 0);
 }
 else {
-	tcapi_create_content_log();
+	lrs_create_content_log();
 	header('HTTP/1.0 401 Unauthorized',TRUE,401);			
 }
 exit;
 
-function tcapi_create_content_log() {
+function lrs_create_content_log() {
 	$contents = ob_get_contents();
 	ob_end_clean();
-	if (TCAPI_LOG_CONTENT_ENDPOINT) {
+	if (LRS_LOG_CONTENT_ENDPOINT) {
 		$h = fopen("content_log.txt",'a+');
 		fwrite($h, $contents);
 		fclose($h);

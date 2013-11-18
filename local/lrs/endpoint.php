@@ -1,4 +1,19 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * NO_DEBUG_DISPLAY - disable moodle specific debug messages and any errors in output
  */
@@ -12,7 +27,7 @@ define('NO_MOODLE_COOKIES', true);
 include_once '../../config.php';
 include_once './locallib.php';
 
-if (TCAPI_LOG_ENDPOINT) {
+if (LRS_LOG_ENDPOINT) {
 	ob_start();
         $methodvariables = array();
         // Get GET and POST parameters.
@@ -49,7 +64,7 @@ if (TCAPI_LOG_ENDPOINT) {
 
 
 /**
- * TCAPI REST web service entry point.
+ * LRS REST web service entry point.
  * For ./statements and ./activity/state endpoint access, the authentication is done via tokens.
  * For direct access, ie.: record retrieval and operations, the authentication is done via 
  *
@@ -65,8 +80,7 @@ if (!webservice_protocol_is_enabled('rest')) {
     die;
 }
 
-$server = new webservice_tcapi_server(WEBSERVICE_AUTHMETHOD_PERMANENT_TOKEN);
+$server = new webservice_lrs_server(WEBSERVICE_AUTHMETHOD_PERMANENT_TOKEN);
 $server->run();
 
 die;
-?>

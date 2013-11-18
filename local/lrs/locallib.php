@@ -1,52 +1,67 @@
 <?php
-define('TCAPI_LOG_ENDPOINT', 0);
-define('TCAPI_LOG_CONTENT_ENDPOINT', 0);
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-define('TCAPI_SERVICE','local_tcapi');
-define('TCAPI_MUST_EXIST',1);
-define('TCAPI_MUST_NOT_EXIST',2);
-define('TCAPI_OPTIONAL',8);
-define('TCAPI_REQUIRED',9);
-define('TCAPI_RETURN_OK','200');
-define('TCAPI_RETURN_NOCONTENT','204');
-define('TCAPI_RETURN_CONFLICT','409');
-define('TCAPI_RETURN_PRECONDITIONFAILED','412');
+define('LRS_LOG_ENDPOINT', 0);
+define('LRS_LOG_CONTENT_ENDPOINT', 0);
 
-if (isset($CFG->tcapi_endpoint))
-	define('TCAPI_ENDPOINT',$CFG->tcapi_endpoint);
+define('LRS_SERVICE','local_lrs');
+define('LRS_MUST_EXIST',1);
+define('LRS_MUST_NOT_EXIST',2);
+define('LRS_OPTIONAL',8);
+define('LRS_REQUIRED',9);
+define('LRS_RETURN_OK','200');
+define('LRS_RETURN_NOCONTENT','204');
+define('LRS_RETURN_CONFLICT','409');
+define('LRS_RETURN_PRECONDITIONFAILED','412');
+
+if (isset($CFG->lrs_endpoint))
+	define('LRS_ENDPOINT',$CFG->lrs_endpoint);
 else
-	define('TCAPI_ENDPOINT',$CFG->wwwroot.'/local/tcapi/endpoint.php/');
+	define('LRS_ENDPOINT',$CFG->wwwroot.'/local/lrs/endpoint.php/');
 
-if (isset($CFG->tcapi_content_endpoint))
-	define('TCAPI_CONTENT_ENDPOINT',$CFG->tcapi_content_endpoint);
+if (isset($CFG->lrs_content_endpoint))
+	define('LRS_CONTENT_ENDPOINT',$CFG->lrs_content_endpoint);
 else
-	define('TCAPI_CONTENT_ENDPOINT',$CFG->wwwroot.'/local/tcapi/content_endpoint.php');
+	define('LRS_CONTENT_ENDPOINT',$CFG->wwwroot.'/local/lrs/content_endpoint.php');
 	
 /**
- * Set SYSTEM role permission assignments for use of TCAPI.
- * This includes moodle/webservice:createtoken and local/tcapi:use.
+ * Set SYSTEM role permission assignments for use of lrs.
+ * This includes moodle/webservice:createtoken and local/lrs:use.
  * Affected user role is Authenticated user / user
  */
-function local_tcapi_set_role_permission_overrides() {
+function local_lrs_set_role_permission_overrides() {
 	global $CFG,$DB;
 	$role = $DB->get_record('role', array('archetype'=>'user'), 'id', MUST_EXIST);
 	if (isset($role->id)) {
 		require_once $CFG->dirroot.'/lib/accesslib.php';
 		role_change_permission($role->id, context_system::instance(), 'moodle/webservice:createtoken', CAP_ALLOW);
 		role_change_permission($role->id, context_system::instance(), 'webservice/rest:use', CAP_ALLOW);
-		role_change_permission($role->id, context_system::instance(), 'local/tcapi:use', CAP_ALLOW);
+		role_change_permission($role->id, context_system::instance(), 'local/lrs:use', CAP_ALLOW);
 	}
 }
 
 /**
- * Gets a stored user token for use in making requests to external TCAPI webservice.
+ * Gets a stored user token for use in making requests to external lrs webservice.
  * If a token does not exist, one is created.
  */
-function local_tcapi_get_user_token() {
+function local_lrs_get_user_token() {
 	global $USER,$DB;
     // if service doesn't exist, dml will throw exception
-    $service_record = $DB->get_record('external_services', array('shortname'=>TCAPI_SERVICE, 'enabled'=>1), '*', MUST_EXIST);
-	if ($token = local_tcapi_user_token_exists($service_record->id)) {
+    $service_record = $DB->get_record('external_services', array('shortname'=>LRS_SERVICE, 'enabled'=>1), '*', MUST_EXIST);
+	if ($token = local_lrs_user_token_exists($service_record->id)) {
 		return $token;
 	} else if (has_capability('moodle/webservice:createtoken', context_system::instance())) {
 	    // make sure the token doesn't exist (borrowed from /lib/externallib.php)
@@ -71,21 +86,21 @@ function local_tcapi_get_user_token() {
         add_to_log(SITEID, 'webservice', 'automatically create user token', '' , 'User ID: ' . $USER->id);
         $token->id = $tokenid;
     } else {
-        throw new moodle_exception('cannotcreatetoken', 'webservice', '', TCAPI_SERVICE);
+        throw new moodle_exception('cannotcreatetoken', 'webservice', '', LRS_SERVICE);
     }
     return $token;
 }
 
 /**
- * Simple check to see if a token for TCAPI web service already exists for a user
+ * Simple check to see if a token for lrs web service already exists for a user
  * and returns it.
  * @param Integer $serviceid
  */
-function local_tcapi_user_token_exists($serviceid=null) {
+function local_lrs_user_token_exists($serviceid=null) {
 	global $USER,$DB;
 	if ($serviceid == null) {
 	    // if service doesn't exist, dml will throw exception
-	    $service_record = $DB->get_record('external_services', array('shortname'=>TCAPI_SERVICE, 'enabled'=>1), '*', MUST_EXIST);
+	    $service_record = $DB->get_record('external_services', array('shortname'=>LRS_SERVICE, 'enabled'=>1), '*', MUST_EXIST);
 	    $serviceid = $service_record->id;
 	}
 	//Check if a token has already been created for this user and this service
@@ -108,22 +123,22 @@ function local_tcapi_user_token_exists($serviceid=null) {
 }
 
 /**
- * TCAPI web service implementation classes and methods.
+ * lrs web service implementation classes and methods.
  *
- * @package    local_tcapi
+ * @package    local_lrs
  * @copyright  2012 Jamie Smith
  */
 require_once("$CFG->dirroot/webservice/lib.php");
 
 
 /**
- * TCAPI service server implementation.
- * Borrowed from Moodle webservice_rest_server class and modified to suit TCAPI requirements.
+ * lrs service server implementation.
+ * Borrowed from Moodle webservice_rest_server class and modified to suit lrs requirements.
  *
- * @package    local_tcapi
+ * @package    local_lrs
  * @copyright  2012 Jamie Smith
  */
-class webservice_tcapi_server extends webservice_base_server {
+class webservice_lrs_server extends webservice_base_server {
 
     /** @var string return header response code */
     protected $response_code;
@@ -166,7 +181,7 @@ class webservice_tcapi_server extends webservice_base_server {
 	    
 	    // now how about PUT/POST bodies? These override any existing parameters.
         $body = @file_get_contents('php://input');
-        if (TCAPI_LOG_ENDPOINT) {
+        if (LRS_LOG_ENDPOINT) {
         	global $DEBUGBODY;
         	if (isset($DEBUGBODY))
         		$body = $DEBUGBODY;
@@ -389,7 +404,7 @@ class webservice_tcapi_server extends webservice_base_server {
         }
         if (!empty($functionname)) {
         	$this->get_functionparams($functionname);
-        	return 'local_tcapi_'.$functionname;
+        	return 'local_lrs_'.$functionname;
         }
         return null;
     }
@@ -432,13 +447,13 @@ class webservice_tcapi_server extends webservice_base_server {
 
 
 /**
- * TCAPI test client class
+ * lrs test client class
  *
- * @package    webservice_tcapi
+ * @package    webservice_lrs
  * @copyright  2012 Jamie Smith
  * TODO: Refine to allow tesing of service. (Should construct sample statement.)
  */
-class webservice_tcapi_test_client implements webservice_test_client_interface {
+class webservice_lrs_test_client implements webservice_test_client_interface {
     /**
      * Execute test client WS request
      * @param string $serverurl server url (including token parameter)
@@ -459,7 +474,7 @@ class webservice_tcapi_test_client implements webservice_test_client_interface {
  * @throws invalid_parameter_exception
  * @return mixed $return object to be used by external service or false if failure
  */
-function local_tcapi_store_statement ($params) {
+function local_lrs_store_statement ($params) {
 	global $DB;
 	if (!is_null($params['content']) && ($statement = json_decode($params['content']))) {
 		if (is_null($params['statementId']) && !isset($statement->id)) {
@@ -470,7 +485,7 @@ function local_tcapi_store_statement ($params) {
 		        $statementId = md5(uniqid(rand(),1));
 		        if ($numtries > 5)
 		            throw new invalid_response_exception('Could not create statement_id.');
-		    } while ($DB->record_exists('tcapi_statement', array('statement_id'=>$statementId)) && $numtries <= 5);
+		    } while ($DB->record_exists('lrs_statement', array('statement_id'=>$statementId)) && $numtries <= 5);
 		} else
 			$statementId = (isset($statement->id)) ? $statement->id : $params['statementId'];
 		$sData = new stdClass();
@@ -480,7 +495,7 @@ function local_tcapi_store_statement ($params) {
 		$sData->verb = (isset($statement->verb)) ? $statement->verb : 'experienced';
 		if (isset($statement->inProgress))
 			$sData->inProgress = '1';
-		if (!($actor = local_tcapi_get_actor($statement->actor))) {
+		if (!($actor = local_lrs_get_actor($statement->actor))) {
 			throw new invalid_response_exception('Agent object could not be found or created.');
 			return false;
 		} else
@@ -489,11 +504,11 @@ function local_tcapi_store_statement ($params) {
 			if (isset($statement->context->registration))
 				$sData->registration = $statement->context->registration;
 			if (isset($statement->context->instructor)) {
-				if ($actor = local_tcapi_get_actor($statement->context->instructor, true))
+				if ($actor = local_lrs_get_actor($statement->context->instructor, true))
 					$sData->instructorid = $actor->id;
 			}
 			if (isset($statement->context->team)) {
-				if ($actor = local_tcapi_get_actor($statement->context->team, true))
+				if ($actor = local_lrs_get_actor($statement->context->team, true))
 					$sData->teamid = $actor->id;
 			}
 			if (isset($statement->context->contextActivities)) {
@@ -506,7 +521,7 @@ function local_tcapi_store_statement ($params) {
 							$activity->activity_id = $statement->context->contextActivities->$ca->id;
 							if (isset($sData->context_groupingid))
 								$activity->grouping_id = $sData->context_groupingid;
-							if ($activity = local_tcapi_get_activity($activity))
+							if ($activity = local_lrs_get_activity($activity))
 								$sData->$fieldId = $activity->id;
 					}
 				}
@@ -526,7 +541,7 @@ function local_tcapi_store_statement ($params) {
 							$activity->definition = $statement->object->definition;
 						if (isset($sData->context_groupingid))
 							$activity->grouping_id = $sData->context_groupingid;
-						if (!($activity = local_tcapi_get_activity($activity))) {
+						if (!($activity = local_lrs_get_activity($activity))) {
 							throw new invalid_response_exception('Activity could not be found or created.');
 							return false;
 						}
@@ -541,9 +556,9 @@ function local_tcapi_store_statement ($params) {
 				break;
 				case 'statement':
 					if ($sData->verb == 'voided') {
-						if (isset($statement->object->id) && ($r = $DB->get_record_select('tcapi_statement', 'statement_id = \'?\'', array($statement->object->id)))) {
+						if (isset($statement->object->id) && ($r = $DB->get_record_select('lrs_statement', 'statement_id = \'?\'', array($statement->object->id)))) {
 							$r->voided = '1';
-							if ($DB->update_record('tcapi_statement', $r) !== true) {
+							if ($DB->update_record('lrs_statement', $r) !== true) {
 								throw new invalid_parameter_exception('Statement could not be voided.');
 								return false;							
 							}
@@ -558,7 +573,7 @@ function local_tcapi_store_statement ($params) {
 				case 'person':
 				case 'group':
 					if (isset($statement->object->id)) {
-						if (!($actor = local_tcapi_get_actor($params['actor'], true))) {
+						if (!($actor = local_lrs_get_actor($params['actor'], true))) {
 							throw new invalid_response_exception('Agent object could not be found or created.');
 							return false;
 						}
@@ -584,7 +599,7 @@ function local_tcapi_store_statement ($params) {
 			if (isset($statement->result->completion))
 				$rData->completion = (strtolower($statement->result->completion) == 'completed' || $statement->result->completion == true) ? '1' : '0';
 			if (isset($statement->result->duration)) {
-				if ($tarr = local_tcapi_parse_duration($statement->result->duration))
+				if ($tarr = local_lrs_parse_duration($statement->result->duration))
 					$rData->duration = implode(":",$tarr);
 			}
 			// Check special verbs for assumed completion and success results.
@@ -603,10 +618,10 @@ function local_tcapi_store_statement ($params) {
 			}
 			if (isset($statement->result->response))
 				$rData->response = $statement->result->response;
-			if (($rid = $DB->insert_record('tcapi_result',$rData,true)) !== false)
+			if (($rid = $DB->insert_record('lrs_result',$rData,true)) !== false)
 				$sData->resultid = $rid;
 		}
-		if (!$DB->insert_record('tcapi_statement', $sData))
+		if (!$DB->insert_record('lrs_statement', $sData))
 			throw new invalid_response_exception('Activity could not be found or created.');
 		$return = new stdClass();
 		$return->statement = $statement;
@@ -628,10 +643,10 @@ function local_tcapi_store_statement ($params) {
  * @throws invalid_parameter_exception
  * @return mixed empty string or throws exception
  */
-function local_tcapi_store_activity_state ($params) {
+function local_lrs_store_activity_state ($params) {
 	global $DB;
 	if (!is_null($params['activityId']) && !is_null($params['stateId']) && !is_null($params['content'])) {
-		if ($actor = local_tcapi_get_actor($params['actor'])) {
+		if ($actor = local_lrs_get_actor($params['actor'])) {
 			$data = new stdClass();
 			$data->actorid = $actor->id;
 			$data->state_id = $params['stateId'];
@@ -641,18 +656,18 @@ function local_tcapi_store_activity_state ($params) {
 			$data->updated = time();
 			$activity = new stdClass();
 			$activity->activity_id = $params['activityId'];
-			if (!($activity = local_tcapi_get_activity($activity)))
+			if (!($activity = local_lrs_get_activity($activity)))
 				throw new invalid_response_exception('Activity could not be found or created.');
 			else
 				$data->activityid = $activity->id;
 			// Get state content for specific stateId
-			if ($r = $DB->get_record_select('tcapi_state', 'actorid = ? AND activityid = ? AND state_id = ? ORDER BY `updated` DESC',array($actor->id, $activity->id, $params['stateId']),'id'))
+			if ($r = $DB->get_record_select('lrs_state', 'actorid = ? AND activityid = ? AND state_id = ? ORDER BY `updated` DESC',array($actor->id, $activity->id, $params['stateId']),'id'))
 			{
 				$data->id = $r->id;
-				if ($DB->update_record('tcapi_state', $data))
+				if ($DB->update_record('lrs_state', $data))
 					return '';
 				
-			} elseif ($DB->insert_record('tcapi_state', $data))
+			} elseif ($DB->insert_record('lrs_state', $data))
 					return '';
 		}
 	}
@@ -668,24 +683,24 @@ function local_tcapi_store_activity_state ($params) {
  * @throws invalid_parameter_exception
  * @return mixed string containing state, string containing json encoded array of stored stateIds, or throws exception
  */
-function local_tcapi_fetch_activity_state ($params) {
+function local_lrs_fetch_activity_state ($params) {
 	global $DB;
 	if (!is_null($params['activityId'])) {
-		if ($actor = local_tcapi_get_actor($params['actor'])) {
+		if ($actor = local_lrs_get_actor($params['actor'])) {
 			$return = '';
 			$activity = new stdClass();
 			$activity->activity_id = $params['activityId'];
-			if (!($activity = local_tcapi_get_activity($activity,true)))
+			if (!($activity = local_lrs_get_activity($activity,true)))
 				return $return;
 			if (isset($params['stateId'])) {
 				// Get state content for specific stateId
-				if ($r = $DB->get_record_select('tcapi_state', 'actorid = ? AND activityid = ? AND state_id = ? ORDER BY `updated` DESC',array($actor->id, $activity->id, $params['stateId']),'id,contents'))
+				if ($r = $DB->get_record_select('lrs_state', 'actorid = ? AND activityid = ? AND state_id = ? ORDER BY `updated` DESC',array($actor->id, $activity->id, $params['stateId']),'id,contents'))
 					$return = $r->contents;
 			} else {
 				$states = array();
 				$since = (isset($params['since']) && ($sinceTime = strtotime($params['since']))) ? 'AND `updated` >= '.$sinceTime : '';
 				// Get all stateIds stored
-				if ($rs = $DB->get_records_select('tcapi_state', 'actorid = ? AND activityid = ?'.$since,array($actor->id, $activity->id),'','id,state_id')) {
+				if ($rs = $DB->get_records_select('lrs_state', 'actorid = ? AND activityid = ?'.$since,array($actor->id, $activity->id),'','id,state_id')) {
 					foreach ($rs as $r)
 						array_push($states,$r->stateid);
 				}
@@ -702,23 +717,23 @@ function local_tcapi_fetch_activity_state ($params) {
  * @param array $params array of parameter passed from external service
  * @return mixed an empty string if success or throws an exception
  */
-function local_tcapi_delete_activity_state ($params) {
+function local_lrs_delete_activity_state ($params) {
 	global $DB;
 	if (!is_null($params['activityId'])) {
-		if ($actor = local_tcapi_get_actor($params['actor'])) {
+		if ($actor = local_lrs_get_actor($params['actor'])) {
 			$activity = new stdClass();
 			$activity->activity_id = $params['activityId'];
-			if (!($activity = local_tcapi_get_activity($activity,true)))
+			if (!($activity = local_lrs_get_activity($activity,true)))
 				throw new invalid_response_exception('Activity could not be found.');
 			// Delete all states stored
-			$DB->delete_records_select('tcapi_state', 'actorid = ? AND activityid = ?',array($actor->id, $activity->id));
+			$DB->delete_records_select('lrs_state', 'actorid = ? AND activityid = ?',array($actor->id, $activity->id));
 			return '';
 		}
 	}
 	throw new invalid_parameter_exception('Parameters invalid or actor could not be found.');
 }
 
-function local_tcapi_get_actor ($actor, $objectType = false) {
+function local_lrs_get_actor ($actor, $objectType = false) {
 	global $DB;
 	if ((is_null($actor) || !is_object($actor)) && $objectType === false) {
 		global $USER;
@@ -743,53 +758,53 @@ function local_tcapi_get_actor ($actor, $objectType = false) {
 		array_push($xtrasql, '(mbox LIKE \'%"'. implode("\"%' OR mbox LIKE '%\"",$object->mbox) .'"%\')');
 	if (!empty($xtrasql))
 		$sqlwhere .= ' AND ('.implode(" OR ", $xtrasql).')';
-	if (($actor = $DB->get_record_select('tcapi_agent', $sqlwhere)))
+	if (($actor = $DB->get_record_select('lrs_agent', $sqlwhere)))
 	{
-		$actor = local_tcapi_push_actor_properties($actor, $object);
+		$actor = local_lrs_push_actor_properties($actor, $object);
 		if (isset($object->localid))
 			$actor->localid = $object->localid;
-		$DB->update_record('tcapi_agent', local_tcapi_db_conform($actor));
+		$DB->update_record('lrs_agent', local_lrs_db_conform($actor));
 		return $actor;
 	} else {
 		$actor = new stdClass();
 		$actor->object_type = 'person';
 		if (isset($object->localid))
 			$actor->localid = $object->localid;
-		$actor = local_tcapi_push_actor_properties($actor, $object);
-		if ($actor->id = $DB->insert_record('tcapi_agent', local_tcapi_db_conform($actor), true))
+		$actor = local_lrs_push_actor_properties($actor, $object);
+		if ($actor->id = $DB->insert_record('lrs_agent', local_lrs_db_conform($actor), true))
 			return $actor;
 	}
 	return false;
 }
 
-function local_tcapi_get_activity ($object, $mustExist=false, $forceupdate=false) {
+function local_lrs_get_activity ($object, $mustExist=false, $forceupdate=false) {
 	global $DB,$CFG;
 	$isMetaLink = (filter_var($object->activity_id,FILTER_VALIDATE_URL,FILTER_FLAG_PATH_REQUIRED)
 		&& basename($object->activity_id) == 'tincan.xml');
-	if (($isMetaLink && ($activity = $DB->get_record_select('tcapi_activity', 'metaurl = ?', array($object->activity_id))))
-		|| (isset($object->grouping_id) && ($activity = $DB->get_record_select('tcapi_activity', 'activity_id = ? && grouping_id = ?', array($object->activity_id, $object->grouping_id))))
-		|| (!isset($object->grouping_id) && !isset($object->metaurl) && ($activity = $DB->get_record_select('tcapi_activity', 'activity_id = ?', array($object->activity_id))))
-		|| (isset($object->metaurl) && ($activity = $DB->get_record_select('tcapi_activity', 'activity_id = ? && metaurl = ?', array($object->activity_id, $object->metaurl))))
+	if (($isMetaLink && ($activity = $DB->get_record_select('lrs_activity', 'metaurl = ?', array($object->activity_id))))
+		|| (isset($object->grouping_id) && ($activity = $DB->get_record_select('lrs_activity', 'activity_id = ? && grouping_id = ?', array($object->activity_id, $object->grouping_id))))
+		|| (!isset($object->grouping_id) && !isset($object->metaurl) && ($activity = $DB->get_record_select('lrs_activity', 'activity_id = ?', array($object->activity_id))))
+		|| (isset($object->metaurl) && ($activity = $DB->get_record_select('lrs_activity', 'activity_id = ? && metaurl = ?', array($object->activity_id, $object->metaurl))))
 		)
 	{
 		if (empty($activity->known) || $forceupdate) {
-			$activity = local_tcapi_push_activity_properties($activity, $object);
-			$DB->update_record('tcapi_activity', local_tcapi_db_conform($activity));
+			$activity = local_lrs_push_activity_properties($activity, $object);
+			$DB->update_record('lrs_activity', local_lrs_db_conform($activity));
 		}
 		return $activity;
 	} else if ($isMetaLink)
 	{
 		$object->metaurl = $object->activity_id;
 		// activity is defined in tincan.xml file
-		$mparser = new local_tcapi_metaParser($object->metaurl);
+		$mparser = new local_lrs_metaParser($object->metaurl);
 		if (($activity = $mparser->parse()) && empty($mparser->errors))
 			return $activity;
 		elseif (!empty($mparser->errors))
 			throw new invalid_response_exception(implode(" ",$mparser->errors));
 	} else if ($mustExist === false) {
 		$activity = new stdClass();
-		$activity = local_tcapi_push_activity_properties($activity, $object);
-		if ($activity->id = $DB->insert_record('tcapi_activity', local_tcapi_db_conform($activity), true))
+		$activity = local_lrs_push_activity_properties($activity, $object);
+		if ($activity->id = $DB->insert_record('lrs_activity', local_lrs_db_conform($activity), true))
 			return $activity;
 	}
 	return false;
@@ -805,7 +820,7 @@ function local_tcapi_get_activity ($object, $mustExist=false, $forceupdate=false
  * @throws invalid_parameter_exception
  * @return object $newobject
  */
-function local_tcapi_db_conform ($object) {
+function local_lrs_db_conform ($object) {
 	$newobject = new stdClass();
 	foreach ($object as $key => $val) {
 		$key = strtolower(preg_replace('/([A-Z])/', '_$1', $key));
@@ -814,30 +829,30 @@ function local_tcapi_db_conform ($object) {
 	return $newobject;
 }
 
-function local_tcapi_get_activity_id ($activity_id) {
-	return $DB->get_record_select('tcapi_activity', 'activity_id = ?', array($activity_id));
+function local_lrs_get_activity_id ($activity_id) {
+	return $DB->get_record_select('lrs_activity', 'activity_id = ?', array($activity_id));
 }
 
-function local_tcapi_push_actor_properties ($actor, $object) {
+function local_lrs_push_actor_properties ($actor, $object) {
 	$actor->givenName = isset($actor->given_name) ? $actor->given_name : null;
 	$actor->familyName = isset($actor->family_name) ? $actor->family_name : null;
 	$actor->firstName = isset($actor->first_name) ? $actor->first_name : null;
 	$actor->lastName = isset($actor->last_name) ? $actor->last_name : null;
-	return local_tcapi_push_object_properties ($actor, $object, array('name','mbox','mbox_sha1sum','openid','account','givenName','familyName','firstName','lastName'),
+	return local_lrs_push_object_properties ($actor, $object, array('name','mbox','mbox_sha1sum','openid','account','givenName','familyName','firstName','lastName'),
 			 array('name','mbox','mbox_sha1sum','openid','account','givenName','familyName','firstName','lastName'));
 }
 
-function local_tcapi_push_activity_properties ($activity, $object) {
+function local_lrs_push_activity_properties ($activity, $object) {
 	$activity->interactionType = isset($activity->interaction_type) ? $activity->interaction_type : null;
 	if (isset($object->definition)) {
 		$object->name = (isset($object->definition->name)) ? $object->definition->name : null;
 		$object->description = (isset($object->definition->description)) ? $object->definition->description : null;
 	}
-	return local_tcapi_push_object_properties ($activity, $object, array('activity_id','metaurl','known','name','description','type','interactionType','extensions','grouping_id'),
+	return local_lrs_push_object_properties ($activity, $object, array('activity_id','metaurl','known','name','description','type','interactionType','extensions','grouping_id'),
 			false, array('name','description'));
 }
 
-function local_tcapi_push_object_properties ($currObject, $pushObject, $propertyKeys, $multipleVals=false, $isObject=false) {
+function local_lrs_push_object_properties ($currObject, $pushObject, $propertyKeys, $multipleVals=false, $isObject=false) {
 	foreach ($propertyKeys as $key) {
 		if (isset($pushObject->$key) && !empty($pushObject->$key)) {
 			if ($multipleVals !== false && in_array($key, $multipleVals)) {
@@ -879,13 +894,13 @@ function local_tcapi_push_object_properties ($currObject, $pushObject, $property
 
 /**
  * 
- * This class allows parsing of TCAPI xml node object.
+ * This class allows parsing of lrs xml node object.
  * The returnObject holds the object ready for json and inclusion in a statement.
  * dbObject returns an object ready for insertion updating of a DB entry.
  * @author Jamie Smith 2012
  *
  */
-class local_tcapi_activityParser {
+class local_lrs_activityParser {
 	
 	var $objectType;
 	var $xml;
@@ -1005,7 +1020,7 @@ class local_tcapi_activityParser {
 	
 }
 
-class local_tcapi_metaParser {
+class local_lrs_metaParser {
 	
 	var $xmlUrl;
 	var $xml;
@@ -1023,13 +1038,13 @@ class local_tcapi_metaParser {
 			return false;
 		if (isset($this->xml->activities) && isset($this->xml->activities->activity)) {
 			for ($i=0;$i<$this->xml->activities->activity->count();$i++) {
-				$aparser = new local_tcapi_activityParser('activity');
+				$aparser = new local_lrs_activityParser('activity');
 				$aparser->parseObject($this->xml->activities->activity[$i]);
 				if (!isset($this->mainActivity) && isset($aparser->activity->id)
 					&& isset($aparser->activity->definition->type) && $aparser->activity->definition->type == 'course') {
 					$aparser->metaurl = $this->xmlUrl;
 					$aparser->parseObject($this->xml->activities->activity[$i]);
-					$this->mainActivity = local_tcapi_get_activity($aparser->dbObject, false, true);
+					$this->mainActivity = local_lrs_get_activity($aparser->dbObject, false, true);
 				}
 				else
 					array_push($this->activities,$aparser->dbObject);
@@ -1037,7 +1052,7 @@ class local_tcapi_metaParser {
 			if (isset($this->mainActivity)) {
 				foreach($this->activities as $dbObject) {
 					$dbObject->grouping_id = $this->mainActivity->id;
-					$activity = local_tcapi_get_activity($dbObject, false, $this->storeActivities);					
+					$activity = local_lrs_get_activity($dbObject, false, $this->storeActivities);
 				}				
 				$return = $this->mainActivity;
 			}
@@ -1054,7 +1069,7 @@ class local_tcapi_metaParser {
 			array_push($this->errors,'XML file not found or unavailable.');
 		elseif ($dom->loadXML($xml) === false)
 			array_push($this->errors,'Could not load XML.');
-		elseif (!$dom->schemaValidate($CFG->dirroot.'/local/tcapi/tincan.xsd')
+		elseif (!$dom->schemaValidate($CFG->dirroot.'/local/lrs/tincan.xsd')
 			|| ($this->xml = simplexml_import_dom($dom)) === false)
 			{
 				array_push($this->errors,'XML file invalid for schema.');
@@ -1074,7 +1089,7 @@ class local_tcapi_metaParser {
 			$url = str_replace('pluginfile.php', 'webservice/pluginfile.php', clean_param($this->xmlUrl, PARAM_LOCALURL));
 			// Determine connector for launch params.
 			$connector = (stripos($url, '?') !== false) ? '&' : '?';
-			if ($token = local_tcapi_get_user_token())
+			if ($token = local_lrs_get_user_token())
 				return file_get_contents($url.$connector.'token='.$token->token);
 		}
 		else
@@ -1089,7 +1104,7 @@ class local_tcapi_metaParser {
  * @return array
  * @param string $str
  **/
-function local_tcapi_parse_duration($str)
+function local_lrs_parse_duration($str)
 {
    $result = array();
    preg_match('/^(?:P)([^T]*)(?:T)?(.*)?$/', trim($str), $sections);
