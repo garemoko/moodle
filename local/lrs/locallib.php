@@ -661,7 +661,7 @@ function local_lrs_store_activity_state ($params) {
 			else
 				$data->activityid = $activity->id;
 			// Get state content for specific stateId
-			if ($r = $DB->get_record_select('lrs_state', 'actorid = ? AND activityid = ? AND state_id = ? ORDER BY `updated` DESC',array($actor->id, $activity->id, $params['stateId']),'id'))
+			if ($r = $DB->get_record_select('lrs_state', 'actorid = ? AND activityid = ? AND state_id = ? ORDER BY updated DESC',array($actor->id, $activity->id, $params['stateId']),'id'))
 			{
 				$data->id = $r->id;
 				if ($DB->update_record('lrs_state', $data))
@@ -690,25 +690,29 @@ function local_lrs_fetch_activity_state ($params) {
 			$return = '';
 			$activity = new stdClass();
 			$activity->activity_id = $params['activityId'];
-			if (!($activity = local_lrs_get_activity($activity,true)))
+			if (!($activity = local_lrs_get_activity($activity,true))) {
 				return $return;
+            }
 			if (isset($params['stateId'])) {
 				// Get state content for specific stateId
-				if ($r = $DB->get_record_select('lrs_state', 'actorid = ? AND activityid = ? AND state_id = ? ORDER BY `updated` DESC',array($actor->id, $activity->id, $params['stateId']),'id,contents'))
+				if ($r = $DB->get_record_select('lrs_state', 'actorid = ? AND activityid = ? AND state_id = ? ORDER BY updated DESC',array($actor->id, $activity->id, $params['stateId']),'id,contents')) {
 					$return = $r->contents;
+                }
 			} else {
 				$states = array();
-				$since = (isset($params['since']) && ($sinceTime = strtotime($params['since']))) ? 'AND `updated` >= '.$sinceTime : '';
+				$since = (isset($params['since']) && ($sinceTime = strtotime($params['since']))) ? 'AND updated >= '.$sinceTime : '';
 				// Get all stateIds stored
 				if ($rs = $DB->get_records_select('lrs_state', 'actorid = ? AND activityid = ?'.$since,array($actor->id, $activity->id),'','id,state_id')) {
-					foreach ($rs as $r)
+					foreach ($rs as $r) {
 						array_push($states,$r->stateid);
+                    }
 				}
 				$return = json_encode($states);
 			}
 			return $return;
 		}
 	}
+
 	throw new invalid_parameter_exception('Parameters invalid or state could not be retrieved.');
 }
 
