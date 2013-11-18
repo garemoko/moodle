@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * scormxml2array class
+ * mod_scorm_xml2array class
  *
  * @package    mod_scorm
  * @author     Dan Marsden <dan@danmarsden.com>
@@ -23,19 +23,18 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_scorm;
 defined('MOODLE_INTERNAL') || die();
 
 /**
  * Grab some XML data, either from a file, URL, etc. however you want. Assume storage in $strYourXML;
- *     $objXML = new scormxml2array();
+ *     $objXML = new mod_scorm_xml2array();
  *     $arr = $objXML->parse($strYourXML);
  *     print_r($arr); //print it out, or do whatever!
  *
  * @package    mod_scorm
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scormxml2array {
+class mod_scorm_xml2array {
 
     protected $arr = array();
     protected $resparser;

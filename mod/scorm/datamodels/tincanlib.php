@@ -200,7 +200,7 @@ function scorm_parse_tincan($scorm, $manifest) {
     $replacement = '&amp;';
     $xmltext = preg_replace($pattern, $replacement, $xmltext);
 
-    $objxml = new scormxml2array();
+    $objxml = new mod_scorm_xml2array();
     $manifests = $objxml->parse($xmltext);
     $scoes = new stdClass();
     $scoes->version = 'TCAPI';

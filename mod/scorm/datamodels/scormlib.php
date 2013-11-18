@@ -520,7 +520,7 @@ function scorm_parse_scorm($scorm, $manifest) {
     $replacement = '&amp;';
     $xmltext = preg_replace($pattern, $replacement, $xmltext);
 
-    $objXML = new scormxml2array();
+    $objXML = new mod_scorm_xml2array();
     $manifests = $objXML->parse($xmltext);
     $scoes = new stdClass();
     $scoes->version = '';
