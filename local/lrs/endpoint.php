@@ -24,11 +24,12 @@ define('NO_DEBUG_DISPLAY', true);
  */
 define('NO_MOODLE_COOKIES', true);
 
-include_once '../../config.php';
-include_once './locallib.php';
+require_once('../../config.php');
+require_once('locallib.php');
+require_once($CFG->dirroot . '/webservice/lib.php');
 
 if (LRS_LOG_ENDPOINT) {
-	ob_start();
+    ob_start();
         $methodvariables = array();
         // Get GET and POST parameters.
         $methodvariables = array_merge($_GET, $_POST);
@@ -40,26 +41,26 @@ if (LRS_LOG_ENDPOINT) {
                 $methodvariables[$param_name] = $param_value;
             }
         } else {
-         	$body_params = array();
-         	parse_str($body,$body_params);
+            $body_params = array();
+            parse_str($body,$body_params);
             foreach($body_params as $param_name => $param_value) {
                 $methodvariables[$param_name] = $param_value;
             }
         }
         echo $_SERVER['REQUEST_METHOD']."\n";
         if (isset($methodvariables['statementId']))
-        	print_r($methodvariables);
+            print_r($methodvariables);
         //echo 'SERVER'."\n";
         //print_r($_SERVER);
         if (function_exists('apache_request_headers')) {
-        	$ah = apache_request_headers();
-	        //print_r($ah);
+            $ah = apache_request_headers();
+            //print_r($ah);
         }
-	$contents = ob_get_contents();
-	$h = fopen("log.txt",'a+');
-	fwrite($h, $contents);
-	fclose($h);	
-	ob_end_clean();
+    $contents = ob_get_contents();
+    $h = fopen("log.txt",'a+');
+    fwrite($h, $contents);
+    fclose($h);
+    ob_end_clean();
 }
 
 
@@ -80,7 +81,7 @@ if (!webservice_protocol_is_enabled('rest')) {
     die;
 }
 
-$server = new webservice_lrs_server(WEBSERVICE_AUTHMETHOD_PERMANENT_TOKEN);
+$server = new local_lrs_webservice_rest_server(WEBSERVICE_AUTHMETHOD_PERMANENT_TOKEN);
 $server->run();
 
 die;
