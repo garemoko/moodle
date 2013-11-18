@@ -778,29 +778,29 @@ function local_lrs_get_actor ($actor, $objectType = false) {
 }
 
 function local_lrs_get_activity ($object, $mustExist=false, $forceupdate=false) {
-	global $DB,$CFG;
+	global $DB, $CFG;
 	$isMetaLink = (filter_var($object->activity_id,FILTER_VALIDATE_URL,FILTER_FLAG_PATH_REQUIRED)
 		&& basename($object->activity_id) == 'tincan.xml');
 	if (($isMetaLink && ($activity = $DB->get_record_select('lrs_activity', 'metaurl = ?', array($object->activity_id))))
-		|| (isset($object->grouping_id) && ($activity = $DB->get_record_select('lrs_activity', 'activity_id = ? && grouping_id = ?', array($object->activity_id, $object->grouping_id))))
+		|| (isset($object->grouping_id) && ($activity = $DB->get_record_select('lrs_activity', 'activity_id = ? AND grouping_id = ?', array($object->activity_id, $object->grouping_id))))
 		|| (!isset($object->grouping_id) && !isset($object->metaurl) && ($activity = $DB->get_record_select('lrs_activity', 'activity_id = ?', array($object->activity_id))))
-		|| (isset($object->metaurl) && ($activity = $DB->get_record_select('lrs_activity', 'activity_id = ? && metaurl = ?', array($object->activity_id, $object->metaurl))))
-		)
-	{
+		|| (isset($object->metaurl) && ($activity = $DB->get_record_select('lrs_activity', 'activity_id = ? AND metaurl = ?', array($object->activity_id, $object->metaurl))))
+		) {
 		if (empty($activity->known) || $forceupdate) {
 			$activity = local_lrs_push_activity_properties($activity, $object);
 			$DB->update_record('lrs_activity', local_lrs_db_conform($activity));
 		}
 		return $activity;
-	} else if ($isMetaLink)
-	{
+	}
+    if ($isMetaLink)	{
 		$object->metaurl = $object->activity_id;
 		// activity is defined in tincan.xml file
 		$mparser = new local_lrs_metaParser($object->metaurl);
-		if (($activity = $mparser->parse()) && empty($mparser->errors))
+		if (($activity = $mparser->parse()) && empty($mparser->errors)) {
 			return $activity;
-		elseif (!empty($mparser->errors))
+        } elseif (!empty($mparser->errors)) {
 			throw new invalid_response_exception(implode(" ",$mparser->errors));
+        }
 	} else if ($mustExist === false) {
 		$activity = new stdClass();
 		$activity = local_lrs_push_activity_properties($activity, $object);

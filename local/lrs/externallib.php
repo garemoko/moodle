@@ -44,9 +44,10 @@ class local_lrs_external extends external_api {
             include_once $CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php';
             $mod_function = $moodle_mod.'_tcapi_fetch_statement';
             $params['moodle_mod_id'] = $moodle_mod_id;
-            if (function_exists($mod_function))
+            if (function_exists($mod_function)) {
                 return call_user_func($mod_function, $params, $statementObject);
-
+            }
+        }
 
         return $statementObject->statement;
     }
@@ -76,8 +77,9 @@ class local_lrs_external extends external_api {
             include_once $CFG->dirroot.'/mod/'.$moodle_mod.'/tcapilib.php';
             $mod_function = $moodle_mod.'_tcapi_store_statement';
             $params['moodle_mod_id'] = $moodle_mod_id;
-            if (function_exists($mod_function))
+            if (function_exists($mod_function)) {
                 return call_user_func($mod_function, $params, $statementObject);
+            }
         }	
 
         return $statementObject->statementId;
