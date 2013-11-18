@@ -1,15 +1,26 @@
 <?php
-/*
- * This is a contribute file created to extend the Moodle SCORM module
- * Jamie Smith - jamie.g.smith@gmail.com
- *
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Tincan functions used by SCORM module.
+ * @package   scorm
+ * @author    Jamie Smith <jamie.g.smith@gmail.com>
+ * @copyright 2013 Jamie Smith
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-// Call just in case.
-include_once $CFG->dirroot.'/mod/scorm/locallib.php';
-
-// Call scormlib.php for access to xml2Array class.
-include_once $CFG->dirroot.'/mod/scorm/datamodels/scormlib.php';
 
 function scorm_get_tincan_launch_params($scorm,$sco,$launchUrl) {
 	global $CFG,$USER;
@@ -189,7 +200,7 @@ function scorm_parse_tincan($scorm, $manifest) {
     $replacement = '&amp;';
     $xmltext = preg_replace($pattern, $replacement, $xmltext);
 
-    $objXML = new xml2Array();
+    $objXML = new scormxml2array();
     $manifests = $objXML->parse($xmltext);
     $scoes = new stdClass();
     $scoes->version = 'TCAPI';

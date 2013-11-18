@@ -520,7 +520,7 @@ function scorm_parse_scorm($scorm, $manifest) {
     $replacement = '&amp;';
     $xmltext = preg_replace($pattern, $replacement, $xmltext);
 
-    $objXML = new xml2Array();
+    $objXML = new scormxml2array();
     $manifests = $objXML->parse($xmltext);
     $scoes = new stdClass();
     $scoes->version = '';
@@ -803,81 +803,4 @@ function scorm_find_common_ancestor($ancestors, $sco) {
         }
     }
     return $pos;
-}
-
-/* Usage
- Grab some XML data, either from a file, URL, etc. however you want. Assume storage in $strYourXML;
-
- $objXML = new xml2Array();
- $arrOutput = $objXML->parse($strYourXML);
- print_r($arrOutput); //print it out, or do whatever!
-
-*/
-class xml2Array {
-
-    var $arrOutput = array();
-    var $resParser;
-    var $strXmlData;
-
-    /**
-     * Convert a utf-8 string to html entities
-     *
-     * @param string $str The UTF-8 string
-     * @return string
-     */
-    function utf8_to_entities($str) {
-        global $CFG;
-
-        $entities = '';
-        $values = array();
-        $lookingfor = 1;
-
-        return $str;
-    }
-
-    /**
-     * Parse an XML text string and create an array tree that rapresent the XML structure
-     *
-     * @param string $strInputXML The XML string
-     * @return array
-     */
-    function parse($strInputXML) {
-        $this->resParser = xml_parser_create ('UTF-8');
-        xml_set_object($this->resParser, $this);
-        xml_set_element_handler($this->resParser, "tagOpen", "tagClosed");
-
-        xml_set_character_data_handler($this->resParser, "tagData");
-
-        $this->strXmlData = xml_parse($this->resParser, $strInputXML );
-        if (!$this->strXmlData) {
-            die(sprintf("XML error: %s at line %d",
-            xml_error_string(xml_get_error_code($this->resParser)),
-            xml_get_current_line_number($this->resParser)));
-        }
-
-        xml_parser_free($this->resParser);
-
-        return $this->arrOutput;
-    }
-
-    function tagOpen($parser, $name, $attrs) {
-        $tag=array("name"=>$name, "attrs"=>$attrs);
-        array_push($this->arrOutput, $tag);
-    }
-
-    function tagData($parser, $tagData) {
-        if (trim($tagData)) {
-            if (isset($this->arrOutput[count($this->arrOutput)-1]['tagData'])) {
-                $this->arrOutput[count($this->arrOutput)-1]['tagData'] .= $this->utf8_to_entities($tagData);
-            } else {
-                $this->arrOutput[count($this->arrOutput)-1]['tagData'] = $this->utf8_to_entities($tagData);
-            }
-        }
-    }
-
-    function tagClosed($parser, $name) {
-        $this->arrOutput[count($this->arrOutput)-2]['children'][] = $this->arrOutput[count($this->arrOutput)-1];
-        array_pop($this->arrOutput);
-    }
-
 }
