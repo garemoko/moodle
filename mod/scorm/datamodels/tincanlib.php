@@ -24,11 +24,11 @@
 
 function scorm_get_tincan_launch_params($scorm, $sco, $launchurl) {
     global $CFG, $USER;
-    require_once($CFG->dirroot.'/local/tcapi/locallib.php');
     // verify tcapi plugin exists, if not, return nothing.
     if (!file_exists($CFG->dirroot.'/local/tcapi/locallib.php')) {
         return '';
     }
+    require_once($CFG->dirroot.'/local/tcapi/locallib.php');
     // Call the TCAPI local webservice locallib for token and endpoint.
     $token = local_tcapi_get_user_token();
     // Generate activity_id as unique using URI method (also provides LRS with metadata path).
