@@ -26,14 +26,7 @@ defined('MOODLE_INTERNAL') || die;
 function xmldb_local_lrs_upgrade($oldversion) {
     global $CFG, $DB, $OUTPUT;
 
-    // Do this every time just to make sure the correct permissions are in place.
-    require_once("$CFG->dirroot/local/lrs/locallib.php");
-    local_lrs_set_role_permission_overrides();
-
     $dbman = $DB->get_manager();
 
     return true;
 }
-
-
-?>

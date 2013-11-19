@@ -35,6 +35,15 @@ function scorm_tincan_enabled($cmid = '') {
     }
 
     // TODO: check permissions of users in this
+    /*
+    $role = $DB->get_record('role', array('archetype' => 'user'), 'id', MUST_EXIST);
+    if (isset($role->id)) {
+        require_once($CFG->dirroot.'/lib/accesslib.php');
+        role_change_permission($role->id, context_system::instance(), 'moodle/webservice:createtoken', CAP_ALLOW);
+        role_change_permission($role->id, context_system::instance(), 'webservice/rest:use', CAP_ALLOW);
+        role_change_permission($role->id, context_system::instance(), 'local/lrs:use', CAP_ALLOW);
+    }
+    */
 }
 
 /*

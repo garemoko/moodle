@@ -40,22 +40,6 @@ if (isset($CFG->lrs_content_endpoint)) {
 }
 
 /**
- * Set SYSTEM role permission assignments for use of lrs.
- * This includes moodle/webservice:createtoken and local/lrs:use.
- * Affected user role is Authenticated user / user
- */
-function local_lrs_set_role_permission_overrides() {
-    global $CFG, $DB;
-    $role = $DB->get_record('role', array('archetype' => 'user'), 'id', MUST_EXIST);
-    if (isset($role->id)) {
-        require_once($CFG->dirroot.'/lib/accesslib.php');
-        role_change_permission($role->id, context_system::instance(), 'moodle/webservice:createtoken', CAP_ALLOW);
-        role_change_permission($role->id, context_system::instance(), 'webservice/rest:use', CAP_ALLOW);
-        role_change_permission($role->id, context_system::instance(), 'local/lrs:use', CAP_ALLOW);
-    }
-}
-
-/**
  * Gets a stored user token for use in making requests to external lrs webservice.
  * If a token does not exist, one is created.
  */
