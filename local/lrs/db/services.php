@@ -36,7 +36,7 @@ $functions = array(
                 'classpath'   => 'local/lrs/externallib.php',
                 'description' => 'Return statement associated with specified statementId.',
                 'type'        => 'read',
-				'capabilities' => 'local/lrs:fetchstatement',
+                'capabilities' => 'local/lrs:fetchstatement',
         ),
         'local_lrs_store_activity_state' => array(
                 'classname'   => 'local_lrs_external',
@@ -64,12 +64,13 @@ $functions = array(
 // We define the services to install as pre-build services. A pre-build service is not editable by administrator.
 $services = array(
         'Tin Can API' => array(
-                'functions' => array ('local_lrs_store_statement','local_lrs_fetch_statement','local_lrs_store_activity_state','local_lrs_fetch_activity_state','local_lrs_delete_activity_state'),
-				'requiredcapability' => 'local/lrs:use',
-				'shortname' => 'local_lrs',
+                'functions' => array ('local_lrs_store_statement', 'local_lrs_fetch_statement',
+                                      'local_lrs_store_activity_state', 'local_lrs_fetch_activity_state',
+                                      'local_lrs_delete_activity_state'),
+                'requiredcapability' => 'local/lrs:use',
+                'shortname' => 'local_lrs',
                 'restrictedusers' => 0,
                 'enabled' => 1,
-				'downloadfiles' => 1,
+                'downloadfiles' => 1,
         )
 );
-?>
