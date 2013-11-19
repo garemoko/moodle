@@ -25,7 +25,7 @@ defined('MOODLE_INTERNAL') || die;
 
 if ($hassiteconfig) {
     // Enable mobile web service
-    $temp = new admin_settingpage('lrsservicesoverview', new lang_string('pluginname', 'local_lrs'));
+    $temp = new admin_settingpage('local_lrs', new lang_string('pluginname', 'local_lrs'));
     $temp->add(new local_lrs_admin_setting_lrsoverview());
     $ADMIN->add('localplugins', $temp);
 }
