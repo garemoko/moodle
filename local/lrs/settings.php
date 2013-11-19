@@ -23,11 +23,9 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-/*
- * For future use.
 if ($hassiteconfig) {
-	$settings = new admin_settingpage('local_tcapi', get_string('tcapi:settings','local_tcapi'));
-	$ADMIN->add('localplugins', $settings);
-	$settings->add(new admin_setting_configcheckbox('local_lrs/onoff', get_string('lrs:onoffoption','local_lrs'), get_string('lrs:onoffoptiondescr','local_lrs'), '0'));
+    // Enable mobile web service
+    $temp = new admin_settingpage('lrsservicesoverview', new lang_string('pluginname', 'local_lrs'));
+    $temp->add(new local_lrs_admin_setting_lrsoverview());
+    $ADMIN->add('localplugins', $temp);
 }
-*/

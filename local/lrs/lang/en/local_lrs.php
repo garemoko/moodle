@@ -22,9 +22,12 @@
  * @copyright  2012 Jamie Smith
  */
 
-$string['pluginname'] = 'Learning Record Store';
+$string['pluginname'] = 'Learning record store';
 $string['lrs:settings'] = 'Settings';
-$string['lrs:onoffoption'] = 'On/Off Option';
-$string['lrs:onoffoptiondescr'] = 'This is a description of the On/Off option.';
-$string['lrs:use'] = 'Use Learning Record Store.';
-$string['lrs:fetchstatement'] = 'Fetch Statements using Learning Record Store';
+$string['lrs:use'] = 'Use learning record store.';
+$string['lrs:fetchstatement'] = 'Fetch Statements using the learning record store';
+$string['enablews'] = 'Enable web services';
+$string['enablewsdescription'] = 'Web services must be enabled in Advanced features.';
+$string['enablerest'] = 'Enable rest';
+$string['enablerestdescription'] = 'The rest protocol must be enabled.';
+$string['lrssteps'] = 'The following steps help you to set up the learning record store.';

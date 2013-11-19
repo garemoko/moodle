@@ -24,7 +24,7 @@
 
 
 // Verify this site is configured to allow Tin can
-function scorm_tincan_enabled($cmid = '') {
+function scorm_tincan_enabled() {
     // First check web services are enabled.
     if (empty($CFG->enablewebservices)) {
         return false;
@@ -34,7 +34,7 @@ function scorm_tincan_enabled($cmid = '') {
         return false;
     }
 
-    // TODO: check permissions of users in this
+    // TODO: check permissions of users to make sure they can submit content for tin can packages.
     /*
     $role = $DB->get_record('role', array('archetype' => 'user'), 'id', MUST_EXIST);
     if (isset($role->id)) {
