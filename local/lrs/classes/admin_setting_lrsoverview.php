@@ -115,9 +115,60 @@ class local_lrs_admin_setting_lrsoverview extends admin_setting {
         $row[2] = get_string('enablerestdescription', 'local_lrs');
         $table->data[] = $row;
 
-        // TODO: Check users have capability to use the web services.
-
         $return .= html_writer::table($table);
+
+        // Now show configuration required for plugins that use LRS
+
+        // These capabilities are required to use the LRS.
+        $requiredcaps = array();
+        $requiredcaps[] = 'moodle/webservice:createtoken';
+        $requiredcaps[] = 'webservice/rest:use';
+        $requiredcaps[] = 'local/lrs:use';
+
+        // Generate list of plugins and their capabilities that need to be checked.
+        $plugins = array();
+        $plugins['mod_scorm'] = 'mod/scorm:savetrack';
+
+        foreach ($plugins as $plugin => $capability) {
+            // Get list of roles that can use this plugin.
+            $rolesneeded = get_roles_with_capability($capability, CAP_ALLOW);
+
+            $return .= $OUTPUT->heading(get_string('pluginname', $plugin), 3, 'main');
+            $return .= get_string('allowplugin', 'local_lrs', get_string('pluginname', $plugin)). $brtag . $brtag;
+            $table = new html_table();
+            $table->head = array(get_string('capability', 'role'), get_string('status'));
+            $table->colclasses = array('leftalign cap', 'leftalign status');
+            $table->id = $plugin.'_caps';
+            $table->attributes['class'] = 'admintable generaltable';
+            $table->data = array();
+
+            foreach ($requiredcaps as $cap) {
+                $row = array();
+                $row[0] = $cap;
+                $row[1] = '';
+                $roleswithcap = get_roles_with_capability($cap, CAP_ALLOW);
+                $ok = false;
+                $rolesok = array();
+                foreach ($roleswithcap as $role) {
+                    $row[1] .= get_string('yes') .' ('. $role->name. ')'. $brtag;
+                    if ($role->shortname == 'user') {
+                        $ok = true; // We don't need to check all roles as auth user has the cap.
+                    }
+                    $rolesok[] = $role->shortname;
+                }
+                if (!$ok) {
+                    // Check all $rolesneeded to make sure they exist in $roleswithcap
+                    foreach ($rolesneeded as $role) {
+                        if (!in_array($role->shortname, $rolesok)) {
+                            $row[1] .= html_writer::tag('span', get_string('check') .' ('. $role->name. ')',
+                                array('class' => 'statuswarning')). $brtag;
+                        }
+                    }
+                }
+                $table->data[] = $row;
+            }
+            $return .= html_writer::table($table);
+        }
 
         return highlight($query, $return);
     }

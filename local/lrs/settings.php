@@ -18,7 +18,8 @@
  * Web service local plugin tcapi settings code.
  *
  * @package    local_lrs
- * @copyright  2012 Jamie Smith
+ * @author Dan Marsden <dan@danmarsden.com>
+ * @copyright  2013 Dan Marsden
  */
 
 defined('MOODLE_INTERNAL') || die;

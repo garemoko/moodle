@@ -31,3 +31,4 @@ $string['enablewsdescription'] = 'Web services must be enabled in Advanced featu
 $string['enablerest'] = 'Enable rest';
 $string['enablerestdescription'] = 'The rest protocol must be enabled.';
 $string['lrssteps'] = 'The following steps help you to set up the learning record store.';
+$string['allowplugin'] = 'To allow the {$a} plugin to use the Learning record store users must be given these capabilities.';
