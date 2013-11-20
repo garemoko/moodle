@@ -14,6 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+
+/**
+ * LRS REST web service entry point.
+ * For ./statements and ./activity/state endpoint access, the authentication is done via tokens.
+ * For direct access, ie.: record retrieval and operations, the authentication is done via
+ * copied from webservice/rest/server.php and modified to suit LRS requirements.
+ *
+ * @package    local_lrs
+ * @copyright  2009 Jerome Mouneyrac
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 /**
  * NO_DEBUG_DISPLAY - disable moodle specific debug messages and any errors in output
  */
@@ -28,60 +40,13 @@ require_once('../../config.php');
 require_once('locallib.php');
 require_once($CFG->dirroot . '/webservice/lib.php');
 
-if (LRS_LOG_ENDPOINT) {
-    ob_start();
-        $methodvariables = array();
-        // Get GET and POST parameters.
-        $methodvariables = array_merge($_GET, $_POST);
-        // now how about PUT/POST bodies? These override any existing parameters.
-        $DEBUGBODY = $body = file_get_contents("php://input");
-        echo $body."\n";
-        if ($body_params = json_decode($body)) {
-            foreach($body_params as $param_name => $param_value) {
-                $methodvariables[$param_name] = $param_value;
-            }
-        } else {
-            $body_params = array();
-            parse_str($body,$body_params);
-            foreach($body_params as $param_name => $param_value) {
-                $methodvariables[$param_name] = $param_value;
-            }
-        }
-        echo $_SERVER['REQUEST_METHOD']."\n";
-        if (isset($methodvariables['statementId']))
-            print_r($methodvariables);
-        //echo 'SERVER'."\n";
-        //print_r($_SERVER);
-        if (function_exists('apache_request_headers')) {
-            $ah = apache_request_headers();
-            //print_r($ah);
-        }
-    $contents = ob_get_contents();
-    $h = fopen("log.txt",'a+');
-    fwrite($h, $contents);
-    fclose($h);
-    ob_end_clean();
-}
-
-
-/**
- * LRS REST web service entry point.
- * For ./statements and ./activity/state endpoint access, the authentication is done via tokens.
- * For direct access, ie.: record retrieval and operations, the authentication is done via 
- *
- * @package    webservice_rest
- * @copyright  2009 Jerome Mouneyrac
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-
 if (!webservice_protocol_is_enabled('rest')) {
-    debugging('The server died because the web services or the REST protocol are not enable',
+    debugging('The lrs service failed because web services or the REST protocol are not enabled',
         DEBUG_DEVELOPER);
     die;
 }
 
 $server = new local_lrs_webservice_rest_server(WEBSERVICE_AUTHMETHOD_PERMANENT_TOKEN);
 $server->run();
-
 die;
+

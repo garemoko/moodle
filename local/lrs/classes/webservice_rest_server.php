@@ -65,12 +65,6 @@ class local_lrs_webservice_rest_server extends webservice_base_server {
 
         // now how about PUT/POST bodies? These override any existing parameters.
         $body = @file_get_contents('php://input');
-        if (LRS_LOG_ENDPOINT) {
-            global $DEBUGBODY;
-            if (isset($DEBUGBODY))
-                $body = $DEBUGBODY;
-        }
-        //echo $body;
         if (!isset($methodvariables['content']))
             $methodvariables['content'] = $body;
         if ($body_params = json_decode($body)) {

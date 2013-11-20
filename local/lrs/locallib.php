@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-define('LRS_LOG_ENDPOINT', 0);
-define('LRS_LOG_CONTENT_ENDPOINT', 0);
-
 define('LRS_SERVICE', 'local_lrs');
 define('LRS_MUST_EXIST', 1);
 define('LRS_MUST_NOT_EXIST', 2);
