@@ -42,12 +42,12 @@ if (isset($CFG->lrs_content_endpoint)) {
  */
 function local_lrs_get_user_token() {
     global $USER, $DB;
-    // if service doesn't exist, dml will throw exception
+    // If service doesn't exist, dml will throw exception.
     $servicerecord = $DB->get_record('external_services', array('shortname' => LRS_SERVICE, 'enabled' => 1), '*', MUST_EXIST);
     if ($token = local_lrs_user_token_exists($servicerecord->id)) {
         return $token;
     } else if (has_capability('moodle/webservice:createtoken', context_system::instance())) {
-        // make sure the token doesn't exist (borrowed from /lib/externallib.php)
+        // Make sure the token doesn't exist (borrowed from /lib/externallib.php).
         $numtries = 0;
         do {
             $numtries ++;
@@ -56,7 +56,7 @@ function local_lrs_get_user_token() {
                 throw new moodle_exception('tokengenerationfailed');
             }
         } while ($DB->record_exists('external_tokens', array('token' => $generatedtoken)) && $numtries <= 5);
-        // create a new token
+        // Create a new token.
         $token = new stdClass;
         $token->token = $generatedtoken;
         $token->userid = $USER->id;
@@ -208,7 +208,7 @@ function local_lrs_store_statement($params) {
                 break;
                 case 'statement':
                     if ($sdata->verb == 'voided') {
-                        if (isset($statement->object->id) && ($r = $DB->get_record_select('lrs_statement', 'statement_id = \'?\'', array($statement->object->id)))) {
+                        if (isset($statement->object->id) && ($r = $DB->get_record('lrs_statement', array('statement_id' => $statement->object->id)))) {
                             $r->voided = '1';
                             if ($DB->update_record('lrs_statement', $r) !== true) {
                                 throw new invalid_parameter_exception('Statement could not be voided.');
@@ -359,7 +359,7 @@ function local_lrs_fetch_activity_state ($params) {
                 return $return;
             }
             if (isset($params['stateId'])) {
-                // Get state content for specific stateId
+                // Get state content for specific stateId.
                 $params = array($actor->id, $activity->id, $params['stateId']);
                 if ($r = $DB->get_record_select('lrs_state', 'actorid = ? AND activityid = ? AND state_id = ? ORDER BY updated DESC', $params, 'id, contents')) {
                     $return = $r->contents;
@@ -367,7 +367,7 @@ function local_lrs_fetch_activity_state ($params) {
             } else {
                 $states = array();
                 $since = (isset($params['since']) && ($sincetime = strtotime($params['since']))) ? 'AND updated >= '.$sincetime : '';
-                // Get all stateIds stored
+                // Get all stateIds stored.
                 if ($rs = $DB->get_records_select('lrs_state', 'actorid = ? AND activityid = ?'.$since, array($actor->id, $activity->id), '', 'id, state_id')) {
                     foreach ($rs as $r) {
                         array_push($states, $r->stateid);
@@ -396,8 +396,8 @@ function local_lrs_delete_activity_state ($params) {
             if (!($activity = local_lrs_get_activity($activity, true))) {
                 throw new invalid_response_exception('Activity could not be found.');
             }
-            // Delete all states stored
-            $DB->delete_records_select('lrs_state', 'actorid = ? AND activityid = ?', array($actor->id, $activity->id));
+            // Delete all states stored.
+            $DB->delete_records('lrs_state', array('actorid' => $actor->id, 'activityid' => $activity->id));
             return '';
         }
     }
@@ -459,20 +459,31 @@ function local_lrs_get_activity ($object, $mustexist=false, $forceupdate=false) 
     global $DB, $CFG;
     $ismetalink = (filter_var($object->activity_id, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED)
         && basename($object->activity_id) == 'tincan.xml');
-    if (($ismetalink && ($activity = $DB->get_record_select('lrs_activity', 'metaurl = ?', array($object->activity_id))))
-        || (isset($object->grouping_id) && ($activity = $DB->get_record_select('lrs_activity', 'activity_id = ? AND grouping_id = ?', array($object->activity_id, $object->grouping_id))))
-        || (!isset($object->grouping_id) && !isset($object->metaurl) && ($activity = $DB->get_record_select('lrs_activity', 'activity_id = ?', array($object->activity_id))))
-        || (isset($object->metaurl) && ($activity = $DB->get_record_select('lrs_activity', 'activity_id = ? AND metaurl = ?', array($object->activity_id, $object->metaurl))))
-        ) {
+
+    if ($ismetalink) {
+        $activity = $DB->get_record('lrs_activity', array('metaurl' => $object->activity_id));
+    }
+    if (empty($activity) && isset($object->grouping_id)) {
+        $activity = $DB->get_record('lrs_activity', array('activity_id' => $object->activity_id, 'grouping_id' => $object->grouping_id));
+    }
+    if (empty($activity) && !isset($object->grouping_id) && !isset($object->metaurl)) {
+        $activity = $DB->get_record('lrs_activity', array('activity_id' => $object->activity_id));
+    }
+    if (empty($activity) && isset($object->metaurl)) {
+        $activity = $DB->get_record('lrs_activity', array('activity_id' => $object->activity_id, 'metaurl' => $object->metaurl));
+    }
+
+    if (!empty($activity)) {
         if (empty($activity->known) || $forceupdate) {
             $activity = local_lrs_push_activity_properties($activity, $object);
             $DB->update_record('lrs_activity', local_lrs_db_conform($activity));
         }
         return $activity;
     }
+
     if ($ismetalink) {
         $object->metaurl = $object->activity_id;
-        // activity is defined in tincan.xml file
+        // Activity is defined in tincan.xml file.
         $mparser = new local_lrs_metaparser($object->metaurl);
         if (($activity = $mparser->parse()) && empty($mparser->errors)) {
             return $activity;
@@ -509,7 +520,7 @@ function local_lrs_db_conform ($object) {
 }
 
 function local_lrs_get_activity_id ($activityid) {
-    return $DB->get_record_select('lrs_activity', 'activity_id = ?', array($activityid));
+    return $DB->get_record('lrs_activity', array('activity_id' =>$activityid));
 }
 
 function local_lrs_push_actor_properties ($actor, $object) {
@@ -517,8 +528,12 @@ function local_lrs_push_actor_properties ($actor, $object) {
     $actor->familyName = isset($actor->family_name) ? $actor->family_name : null;
     $actor->firstName = isset($actor->first_name) ? $actor->first_name : null;
     $actor->lastName = isset($actor->last_name) ? $actor->last_name : null;
-    return local_lrs_push_object_properties ($actor, $object, array('name','mbox','mbox_sha1sum','openid','account','givenName','familyName','firstName','lastName'),
-             array('name','mbox','mbox_sha1sum','openid','account','givenName','familyName','firstName','lastName'));
+    return local_lrs_push_object_properties ($actor, $object, array('name', 'mbox', 'mbox_sha1sum', 'openid',
+                                                                    'account', 'givenName', 'familyName',
+                                                                    'firstName', 'lastName'),
+                                                              array('name', 'mbox', 'mbox_sha1sum', 'openid',
+                                                                    'account', 'givenName', 'familyName',
+                                                                    'firstName', 'lastName'));
 }
 
 function local_lrs_push_activity_properties ($activity, $object) {
@@ -527,8 +542,10 @@ function local_lrs_push_activity_properties ($activity, $object) {
         $object->name = (isset($object->definition->name)) ? $object->definition->name : null;
         $object->description = (isset($object->definition->description)) ? $object->definition->description : null;
     }
-    return local_lrs_push_object_properties ($activity, $object, array('activity_id','metaurl','known','name','description','type','interactionType','extensions','grouping_id'),
-            false, array('name','description'));
+    return local_lrs_push_object_properties ($activity, $object, array('activity_id', 'metaurl', 'known', 'name',
+                                                                       'description', 'type', 'interactionType',
+                                                                       'extensions', 'grouping_id'),
+                                                                 false, array('name', 'description'));
 }
 
 function local_lrs_push_object_properties($currobject, $pushobject, $propertykeys, $multiplevals=false, $isobject=false) {
