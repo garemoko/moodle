@@ -18,7 +18,7 @@
  * Web service local plugin tcapi settings code.
  *
  * @package    local_lrs
- * @author Dan Marsden <dan@danmarsden.com>
+ * @author     Dan Marsden <dan@danmarsden.com>
  * @copyright  2013 Dan Marsden
  */
 
