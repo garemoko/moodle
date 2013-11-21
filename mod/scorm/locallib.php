@@ -247,18 +247,11 @@ function scorm_parse($scorm, $full) {
                         // No need to update.
                         return;
                     }
-        /*
-         * TCAPI Modification
-         * Allow for TinCan package file, tincan.xml.
-         */
-                } else if (strpos($scorm->version, 'TCAPI') !== false) {
+                } else if (scorm_version_check($scorm->version, SCORM_TCAPI)) {
                     if ($fs->get_file($context->id, 'mod_scorm', 'content', 0, '/', 'tincan.xml')) {
-                        // no need to update
+                        // No need to update.
                         return;
                     }
-        /*
-         * End TCAPI Modification
-         */
                 } else if (strpos($scorm->version, 'AICC') !== false) {
                     // TODO: add more sanity checks - something really exists in scorm_content area
                     return;
@@ -288,19 +281,12 @@ function scorm_parse($scorm, $full) {
             if (!scorm_parse_scorm($scorm, $manifest)) {
                 $scorm->version = 'ERROR';
             }
-        /*
-         * TCAPI Modification
-         * Detect if tincan.xml exists and handle as TCAPI package.
-         */
         } else if ($manifest = $fs->get_file($context->id, 'mod_scorm', 'content', 0, '/', 'tincan.xml')) {
             require_once("$CFG->dirroot/mod/scorm/datamodels/tincanlib.php");
-            // TCAPI
+            // Tin Can.
             if (!scorm_parse_tincan($scorm, $manifest)) {
                 $scorm->version = 'ERROR';
             }
-        /*
-         * End TCAPI Modification
-         */
         } else {
             require_once("$CFG->dirroot/mod/scorm/datamodels/aicclib.php");
             // AICC
@@ -311,38 +297,22 @@ function scorm_parse($scorm, $full) {
         }
 
     } else if ($scorm->scormtype === SCORM_TYPE_EXTERNAL and $cfg_scorm->allowtypeexternal) {
-        /*
-         * TCAPI Modification
-         * Determine if is SCORM or TCAPI based on referenced package manifest filename.
-         */
-        // SCORM or TCAPI only, AICC can not be external
-    	if (preg_match('/(http:\/\/|https:\/\/|www).*\/imsmanifest.xml$/i', $scorm->reference)) {
-        	// SCORM
-	        require_once("$CFG->dirroot/mod/scorm/datamodels/scormlib.php");
-	        if (!scorm_parse_scorm($scorm, $scorm->reference)) {
-	            $scorm->version = 'ERROR';
-	        }
+        // Determine if is SCORM or TCAPI based on referenced package manifest filename.
+        if (preg_match('/(http:\/\/|https:\/\/|www).*\/imsmanifest.xml$/i', $scorm->reference)) {
+            // SCORM package.
+            require_once("$CFG->dirroot/mod/scorm/datamodels/scormlib.php");
+            if (!scorm_parse_scorm($scorm, $scorm->reference)) {
+                $scorm->version = 'ERROR';
+            }
         } else if (preg_match('/(http:\/\/|https:\/\/|www).*\/tincan.xml$/i', $scorm->reference)) {
             require_once("$CFG->dirroot/mod/scorm/datamodels/tincanlib.php");
-            // TCAPI
+            // Tin Can Package.
             if (!scorm_parse_tincan($scorm, $scorm->reference)) {
                 $scorm->version = 'ERROR';
             }
         } else {
-        	$scorm->version = 'ERROR';
-        }
-        /*
-         * Replaces:
-         *
-    	require_once("$CFG->dirroot/mod/scorm/datamodels/scormlib.php");
-        // SCORM only, AICC can not be external
-        if (!scorm_parse_scorm($scorm, $scorm->reference)) {
             $scorm->version = 'ERROR';
         }
-        */
-        /*
-         * End TCAPI Modification
-         */
         $newhash = sha1($scorm->reference);
 
     } else if ($scorm->scormtype === SCORM_TYPE_AICCURL  and $cfg_scorm->allowtypeexternalaicc) {

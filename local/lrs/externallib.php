@@ -35,7 +35,6 @@ class local_lrs_external extends external_api {
     }
 
     public static function fetch_statement ($plugin, $pluginid, $registration, $statementid) {
-        global $CFG;
 
         $params = array('registration' => $registration, 'statementId' => $statementid);
 
@@ -66,7 +65,6 @@ class local_lrs_external extends external_api {
     }
 
     public static function store_statement ($plugin, $pluginid, $registration, $statementid, $content) {
-        global $CFG;
 
         $params = array('registration' => $registration, 'statementId' => $statementid, 'content' => $content);
 
@@ -99,7 +97,6 @@ class local_lrs_external extends external_api {
     }
 
     public static function store_activity_state($plugin, $pluginid, $content, $activityid, $actor, $registration, $stateid) {
-        global $CFG;
 
         $params = array('content' => $content, 'activityId' => $activityid, 'actor' => $actor, 'registration' => $registration, 'stateId' => $stateid);
         $params['actor'] = json_decode($actor);
@@ -133,7 +130,6 @@ class local_lrs_external extends external_api {
     }
 
     public static function fetch_activity_state($plugin, $pluginid, $activityid, $actor, $registration, $stateid, $since) {
-        global $CFG;
 
         $params = array('activityId' => $activityid, 'actor' => $actor, 'registration' => $registration, 'stateId' => $stateid, 'since' => $since);
         $params['actor'] = json_decode($actor);
@@ -165,7 +161,6 @@ class local_lrs_external extends external_api {
     }
 
     public static function delete_activity_state($plugin, $pluginid, $activityid, $actor, $registration) {
-        global $CFG;
 
         $params = array('activityId' => $activityid, 'actor' => $actor, 'registration' => $registration);
         $params['actor'] = json_decode($actor);

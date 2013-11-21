@@ -400,6 +400,7 @@ class mod_scorm_mod_form extends moodleform_mod {
                     $errors['packageurl'] = $result;
                 }
             }
+
         } else if ($type === 'packageurl') {
             $reference = $data['reference'];
             // Syntax check.
