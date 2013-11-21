@@ -27,120 +27,129 @@
 
 class local_lrs_activityparser {
 
-    var $objectType;
-    var $xml;
-    var $metaurl;
-    var $activity;
-    var $extensions;
-    var $jsonObject;
-    var $dbObject;
+    public $objecttype;
+    public $xml;
+    public $metaurl;
+    public $activity;
+    public $extensions;
+    public $jsonobject;
+    public $dbobject;
 
-    function __construct ($type) {
-        $this->objectType = $type;
+    public function __construct ($type) {
+        $this->objecttype = $type;
         $this->activity = new stdClass();
     }
 
-    function parseObject($xml) {
+    public function parse_object($xml) {
         $this->xml = $xml;
         $this->activity = new stdClass();
         $this->activity->definition = new stdClass();
-        $this->parseAttrByName('id');
-        $this->parseAttrByName('type', false, 'definition');
-        $this->parseAttrByName('name', true, 'definition');
-        $this->parseAttrByName('description', true, 'definition');
-        $this->parseAttrByName('interactionType', false, 'definition');
-        if ($this->activity->definition->type == 'cmi.interaction' && isset($this->activity->definition->interactionType))
-            $this->parseInteractionExtensions();
-        $this->jsonObject = json_encode($this->activity);
-        $this->createDbObject();
-    }
-
-    function parseAttrByName ($attr,$lang=false,$ca=null) {
-        $a = null;
-        if (isset($this->xml[$attr]))
-            $a = strval($this->xml[$attr]);
-        elseif (isset($this->xml->$attr)) {
-            if ($lang)
-                $a = $this->parseAsLangStr($this->xml->$attr);
-            elseif ($this->xml->$attr->count() > 1) {
-                $a = array();
-                foreach ($this->xml->$attr as $node)
-                    array_push($a,strval($node));
-            } else
-                $a = strval($this->xml->$attr);
+        $this->parse_by_name('id');
+        $this->parse_by_name('type', false, 'definition');
+        $this->parse_by_name('name', true, 'definition');
+        $this->parse_by_name('description', true, 'definition');
+        $this->parse_by_name('interactionType', false, 'definition');
+        if ($this->activity->definition->type == 'cmi.interaction' && isset($this->activity->definition->interactionType)) {
+            $this->parse_interaction_extensions();
         }
-        if (is_null($a))
-            return;
-        if (!is_null($ca))
-            $this->activity->$ca->$attr = $a;
-        else
-            $this->activity->$attr = $a;
+        $this->jsonobject = json_encode($this->activity);
+        $this->create_db_object();
     }
 
-    function parseAsLangStr ($attr) {
+    private function parse_by_name($attr, $lang=false, $ca=null) {
+        $a = null;
+        if (isset($this->xml[$attr])) {
+            $a = strval($this->xml[$attr]);
+        } else if (isset($this->xml->$attr)) {
+            if ($lang) {
+                $a = $this->parse_as_langstr($this->xml->$attr);
+            } else if ($this->xml->$attr->count() > 1) {
+                $a = array();
+                foreach ($this->xml->$attr as $node) {
+                    array_push($a, strval($node));
+                }
+            } else {
+                $a = strval($this->xml->$attr);
+            }
+        }
+        if (is_null($a)) {
+            return;
+        }
+        if (!is_null($ca)) {
+            $this->activity->$ca->$attr = $a;
+        } else {
+            $this->activity->$attr = $a;
+        }
+    }
+
+    private function parse_as_langstr($attr) {
         $arr = array();
-        foreach ($attr as $node)
+        foreach ($attr as $node) {
             $arr[strval($node['lang'])] = strval($node);
+        }
         return (object)$arr;
     }
 
-    function parseInteractionExtensions () {
+    private function parse_interaction_extensions() {
         $this->extensions = new stdClass();
         $crp = (isset($this->xml->correctResponsePatterns->correctResponsePattern)) ? $this->xml->correctResponsePatterns->correctResponsePattern : null;
         if (!is_null($crp)) {
             $cra = array();
-            foreach ($crp as $cr)
-                array_push($cra,strval($cr));
-            $this->activity->definition->correctResponsesPattern = array(implode("[,]",$cra));
-            $this->extensions->correctResponsesPattern = array(implode("[,]",$cra));
+            foreach ($crp as $cr) {
+                array_push($cra, strval($cr));
+            }
+            $this->activity->definition->correctResponsesPattern = array(implode("[,]", $cra));
+            $this->extensions->correctResponsesPattern = array(implode("[,]", $cra));
         }
-        $componentNames = array();
+        $componentnames = array();
         switch ($this->activity->definition->interactionType) {
             case 'choice':
             case 'multiple-choice':
             case 'sequencing':
             case 'true-false':
-                array_push($componentNames,'choices');
+                array_push($componentnames, 'choices');
                 break;
             case 'likert':
-                array_push($componentNames,'scale');
+                array_push($componentnames, 'scale');
                 break;
             case 'matching':
-                array_push($componentNames,'source');
-                array_push($componentNames,'target');
+                array_push($componentnames, 'source');
+                array_push($componentnames, 'target');
                 break;
         }
-        foreach ($componentNames as $components) {
+        foreach ($componentnames as $components) {
             if (isset($this->xml->$components->component)) {
-                $compArray = array();
-                foreach($this->xml->$components->component as $compNode) {
-                    $compObject = new stdClass();
-                    if (isset($compNode->id))
-                        $compObject->id = strval($compNode->id);
-                    else
+                $comparray = array();
+                foreach ($this->xml->$components->component as $compnode) {
+                    $compobject = new stdClass();
+                    if (isset($compnode->id)) {
+                        $compobject->id = strval($compnode->id);
+                    } else {
                         continue;
-                    if (isset($compNode->description))
-                        $compObject->description = $this->parseAsLangStr($compNode->description);
-                    array_push($compArray,$compObject);
+                    }
+                    if (isset($compnode->description)) {
+                        $compobject->description = $this->parse_as_langstr($compnode->description);
+                    }
+                    array_push($comparray, $compobject);
                 }
-                $this->activity->definition->$components = $compArray;
-                $this->extensions->$components = $compArray;
+                $this->activity->definition->$components = $comparray;
+                $this->extensions->$components = $comparray;
             }
         }
         return;
     }
 
-    function createDbObject() {
-        $this->dbObject = new stdClass();
-        $this->dbObject->activity_id = $this->activity->id;
-        if (isset($this->metaurl))
-            $this->dbObject->metaurl = $this->metaurl;
-        $this->dbObject->known = 1;
-        $this->dbObject->name = (isset($this->activity->definition->name)) ? json_encode($this->activity->definition->name) : null;
-        $this->dbObject->description = (isset($this->activity->definition->description)) ? json_encode($this->activity->definition->description) : null;
-        $this->dbObject->type = (isset($this->activity->definition->type)) ? $this->activity->definition->type : null;
-        $this->dbObject->interactionType = (isset($this->activity->definition->interactionType)) ? $this->activity->definition->interactionType : null;
-        $this->dbObject->extensions = (isset($this->extensions)) ? json_encode($this->extensions) : null;
+    private function create_db_object() {
+        $this->dbobject = new stdClass();
+        $this->dbobject->activity_id = $this->activity->id;
+        if (isset($this->metaurl)) {
+            $this->dbobject->metaurl = $this->metaurl;
+        }
+        $this->dbobject->known = 1;
+        $this->dbobject->name = (isset($this->activity->definition->name)) ? json_encode($this->activity->definition->name) : null;
+        $this->dbobject->description = (isset($this->activity->definition->description)) ? json_encode($this->activity->definition->description) : null;
+        $this->dbobject->type = (isset($this->activity->definition->type)) ? $this->activity->definition->type : null;
+        $this->dbobject->interactionType = (isset($this->activity->definition->interactionType)) ? $this->activity->definition->interactionType : null;
+        $this->dbobject->extensions = (isset($this->extensions)) ? json_encode($this->extensions) : null;
     }
-
 }

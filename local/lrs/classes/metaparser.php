@@ -27,57 +27,57 @@
 
 class local_lrs_metaparser {
 
-    var $xmlUrl;
-    var $xml;
-    var $activities = array();
-    var $mainActivity;
-    var $storeActivities = true;
-    var $errors = array();
+    protected $xmlurl;
+    public $xml;
+    public $activities = array();
+    public $mainactivity;
+    public $storeactivities = true;
+    public $errors = array();
 
-    function __construct ($xmlUrl) {
-        $this->xmlUrl = $xmlUrl;
+    public function __construct ($xmlurl) {
+        $this->xmlurl = $xmlurl;
     }
 
-    function parse () {
-        if ($this->validate_xml() == false)
+    public function parse() {
+        if ($this->validate_xml() == false) {
             return false;
+        }
         if (isset($this->xml->activities) && isset($this->xml->activities->activity)) {
-            for ($i=0;$i<$this->xml->activities->activity->count();$i++) {
+            for ($i = 0; $i < $this->xml->activities->activity->count(); $i++) {
                 $aparser = new local_lrs_activityparser('activity');
-                $aparser->parseObject($this->xml->activities->activity[$i]);
-                if (!isset($this->mainActivity) && isset($aparser->activity->id)
+                $aparser->parse_object($this->xml->activities->activity[$i]);
+                if (!isset($this->mainactivity) && isset($aparser->activity->id)
                     && isset($aparser->activity->definition->type) && $aparser->activity->definition->type == 'course') {
-                    $aparser->metaurl = $this->xmlUrl;
-                    $aparser->parseObject($this->xml->activities->activity[$i]);
-                    $this->mainActivity = local_lrs_get_activity($aparser->dbObject, false, true);
+                    $aparser->metaurl = $this->xmlurl;
+                    $aparser->parse_object($this->xml->activities->activity[$i]);
+                    $this->mainactivity = local_lrs_get_activity($aparser->dbobject, false, true);
+                } else {
+                    array_push($this->activities, $aparser->dbobject);
                 }
-                else
-                    array_push($this->activities,$aparser->dbObject);
             }
-            if (isset($this->mainActivity)) {
-                foreach($this->activities as $dbObject) {
-                    $dbObject->grouping_id = $this->mainActivity->id;
-                    $activity = local_lrs_get_activity($dbObject, false, $this->storeActivities);
+            if (isset($this->mainactivity)) {
+                foreach ($this->activities as $dbobject) {
+                    $dbobject->grouping_id = $this->mainactivity->id;
+                    $activity = local_lrs_get_activity($dbobject, false, $this->storeactivities);
                 }
-                $return = $this->mainActivity;
+                $return = $this->mainactivity;
             }
             return $return;
         }
 
     }
 
-    function validate_xml () {
+    private function validate_xml () {
         global $CFG;
         $dom = new DOMDocument;
-        $xml = $this->getXml();
-        if (empty($xml))
-            array_push($this->errors,'XML file not found or unavailable.');
-        elseif ($dom->loadXML($xml) === false)
-            array_push($this->errors,'Could not load XML.');
-        elseif (!$dom->schemaValidate($CFG->dirroot.'/local/lrs/tincan.xsd')
-            || ($this->xml = simplexml_import_dom($dom)) === false)
-        {
-            array_push($this->errors,'XML file invalid for schema.');
+        $xml = $this->getxml();
+        if (empty($xml)) {
+            array_push($this->errors, 'XML file not found or unavailable.');
+        } else if ($dom->loadXML($xml) === false) {
+            array_push($this->errors, 'Could not load XML.');
+        } else if (!$dom->schemaValidate($CFG->dirroot.'/local/lrs/tincan.xsd') ||
+                  ($this->xml = simplexml_import_dom($dom)) === false) {
+            array_push($this->errors, 'XML file invalid for schema.');
             return false;
         }
         return true;
@@ -87,19 +87,20 @@ class local_lrs_metaparser {
      * Attempt to determine if this is a local file accessed with pluginfile.php.
      * If so, get file directly using native file class.
      */
-    function getXml () {
+    private function getxml() {
         global $CFG;
         $search = "$CFG->wwwroot/pluginfile.php/";
-        if (substr($this->xmlUrl,0,strlen($search)) == $search) {
-            $url = str_replace('pluginfile.php', 'webservice/pluginfile.php', clean_param($this->xmlUrl, PARAM_LOCALURL));
+        if (substr($this->xmlurl, 0, strlen($search)) == $search) {
+            $url = str_replace('pluginfile.php', 'webservice/pluginfile.php', clean_param($this->xmlurl, PARAM_LOCALURL));
             // Determine connector for launch params.
             $connector = (stripos($url, '?') !== false) ? '&' : '?';
-            if ($token = local_lrs_get_user_token())
+            if ($token = local_lrs_get_user_token()) {
                 return file_get_contents($url.$connector.'token='.$token->token);
+            }
+        } else {
+            return file_get_contents($this->xmlurl);
         }
-        else
-            return file_get_contents($this->xmlUrl);
-        array_push($this->errors,'User token required but not valid/found.');
+        array_push($this->errors, 'User token required but not valid/found.');
         return '';
     }
 }

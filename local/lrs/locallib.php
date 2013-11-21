@@ -175,10 +175,10 @@ function local_lrs_store_statement($params) {
             }
         }
         if (isset($statement->object)) {
-            if (!isset($statement->object->objectType)) {
-                $statement->object->objectType = 'activity';
+            if (!isset($statement->object->objecttype)) {
+                $statement->object->objecttype = 'activity';
             }
-            $objecttype = strtolower($statement->object->objectType);
+            $objecttype = strtolower($statement->object->objecttype);
             $sdata->object_type = $objecttype;
             switch ($objecttype) {
                 case 'activity':
